@@ -2,8 +2,9 @@ prefix sum,suffix sum,frequency array freq[26] for chars,
 
 subarray : max in subarray , min in subarray, 
 
-
+arrays : reverse array,left/right rotate array,
 
 bit manipulation, single element, XOR tricks,count bits, log2(n), powerset,
 
 stack : NGE,NSE,PGE,PSE. 
+
