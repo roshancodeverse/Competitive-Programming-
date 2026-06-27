@@ -1,0 +1,442 @@
+The Complete DSA Pattern Sheet — Every Pattern You Need to Know
+
+This is the complete pattern-based problem sheet — organized by topic and sub-pattern. Study one pattern at a time.
+
+🟢 Easy 🟡 Medium 🔴 Hard
+
+TOPIC 1 — BASICS
+Pattern: Conditionals (if-else)
+
+Fizz Buzz 🟢 — https://leetcode.com/problems/fizz-buzz
+Palindrome Number 🟢 — https://leetcode.com/problems/palindrome-number
+Number of Steps to Reduce a Number to Zero 🟢 — https://leetcode.com/problems/number-of-steps-to-reduce-a-number-to-zero
+Pattern: Loops
+
+Running Sum of 1d Array 🟢 — https://leetcode.com/problems/running-sum-of-1d-array
+Find Numbers with Even Number of Digits 🟢 — https://leetcode.com/problems/find-numbers-with-even-number-of-digits
+Richest Customer Wealth 🟢 — https://leetcode.com/problems/richest-customer-wealth
+Pattern: Simulation / Implementation
+
+Baseball Game 🟢 — https://leetcode.com/problems/baseball-game
+Robot Return to Origin 🟢 — https://leetcode.com/problems/robot-return-to-origin
+Pattern: Maths
+
+Reverse Integer 🟡 — https://leetcode.com/problems/reverse-integer
+Plus One 🟢 — https://leetcode.com/problems/plus-one
+Add Digits 🟢 — https://leetcode.com/problems/add-digits
+TOPIC 2 — ARRAYS
+Pattern: Fundamentals
+
+Rotate Array 🟡 — https://leetcode.com/problems/rotate-array
+Move Zeroes 🟢 — https://leetcode.com/problems/move-zeroes
+Remove Duplicates from Sorted Array 🟢 — https://leetcode.com/problems/remove-duplicates-from-sorted-array
+Pattern: Prefix Sums
+
+Continuous Subarray Sum 🟡 — https://leetcode.com/problems/continuous-subarray-sum
+Subarray Sum Equals K 🟡 — https://leetcode.com/problems/subarray-sum-equals-k
+Product of Array Except Self 🟡 — https://leetcode.com/problems/product-of-array-except-self
+Subarray Sums Divisible by K 🟡 — https://leetcode.com/problems/subarray-sums-divisible-by-k
+Range Sum Query 2D - Immutable 🟡 — https://leetcode.com/problems/range-sum-query-2d-immutable
+Pattern: Kadane's Algorithm
+
+Maximum Subarray 🟡 — https://leetcode.com/problems/maximum-subarray
+Maximum Product Subarray 🟡 — https://leetcode.com/problems/maximum-product-subarray
+Best Time to Buy and Sell Stock 🟡 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock
+Pattern: Intervals
+
+Merge Intervals 🟡 — https://leetcode.com/problems/merge-intervals
+Insert Interval 🟡 — https://leetcode.com/problems/insert-interval
+Non-overlapping Intervals 🟡 — https://leetcode.com/problems/non-overlapping-intervals
+Pattern: Hashing on Arrays
+
+Two Sum 🟢 — https://leetcode.com/problems/two-sum
+Majority Element 🟢 — https://leetcode.com/problems/majority-element
+Majority Element II 🟡 — https://leetcode.com/problems/majority-element-ii
+Top K Frequent Elements 🟡 — https://leetcode.com/problems/top-k-frequent-elements
+Valid Anagram 🟢 — https://leetcode.com/problems/valid-anagram
+Group Anagrams 🟡 — https://leetcode.com/problems/group-anagrams
+Longest Consecutive Sequence 🟡 — https://leetcode.com/problems/longest-consecutive-sequence
+Pattern: 2D Arrays / Matrix
+
+Spiral Matrix 🟡 — https://leetcode.com/problems/spiral-matrix
+Spiral Matrix II 🟡 — https://leetcode.com/problems/spiral-matrix-ii
+Rotate Image 🟡 — https://leetcode.com/problems/rotate-image
+Set Matrix Zeroes 🟡 — https://leetcode.com/problems/set-matrix-zeroes
+TOPIC 3 — STRINGS
+Pattern: Fundamentals
+
+Reverse String 🟢 — https://leetcode.com/problems/reverse-string
+Reverse Words in a String III 🟢 — https://leetcode.com/problems/reverse-words-in-a-string-iii
+Roman to Integer 🟢 — https://leetcode.com/problems/roman-to-integer
+String Compression 🟡 — https://leetcode.com/problems/string-compression
+Pattern: Frequency & Hashing
+
+Isomorphic Strings 🟢 — https://leetcode.com/problems/isomorphic-strings
+Bulls and Cows 🟡 — https://leetcode.com/problems/bulls-and-cows
+Pattern: Palindromes
+
+Valid Palindrome 🟢 — https://leetcode.com/problems/valid-palindrome
+Longest Palindromic Substring 🟡 — https://leetcode.com/problems/longest-palindromic-substring
+Palindromic Substrings 🟡 — https://leetcode.com/problems/palindromic-substrings
+Palindrome Partitioning 🟡 — https://leetcode.com/problems/palindrome-partitioning
+Pattern: Simulation
+
+Zigzag Conversion 🟡 — https://leetcode.com/problems/zigzag-conversion
+Multiply Strings 🟡 — https://leetcode.com/problems/multiply-strings
+Decode String 🟡 — https://leetcode.com/problems/decode-string
+Pattern: Prefix/Suffix & Pattern Matching
+
+Longest Common Prefix 🟢 — https://leetcode.com/problems/longest-common-prefix
+Find and Replace Pattern 🟡 — https://leetcode.com/problems/find-and-replace-pattern
+Remove Duplicate Letters 🟡 — https://leetcode.com/problems/remove-duplicate-letters
+TOPIC 4 — RECURSION & BACKTRACKING
+Pattern: Fundamentals
+
+Fibonacci Number 🟢 — https://leetcode.com/problems/fibonacci-number
+Power of Two 🟢 — https://leetcode.com/problems/power-of-two
+Pow(x, n) 🟡 — https://leetcode.com/problems/powx-n
+Pattern: Recursion
+
+Different Ways to Add Parentheses 🟡 — https://leetcode.com/problems/different-ways-to-add-parentheses
+K-th Symbol in Grammar 🟡 — https://leetcode.com/problems/k-th-symbol-in-grammar
+Beautiful Arrangement 🟡 — https://leetcode.com/problems/beautiful-arrangement
+Parsing A Boolean Expression 🔴 — https://leetcode.com/problems/parsing-a-boolean-expression
+Integer to English Words 🔴 — https://leetcode.com/problems/integer-to-english-words
+Pattern: Backtracking
+
+Subsets 🟡 — https://leetcode.com/problems/subsets
+Subsets II 🟡 — https://leetcode.com/problems/subsets-ii
+Permutations 🟡 — https://leetcode.com/problems/permutations
+Permutations II 🟡 — https://leetcode.com/problems/permutations-ii
+Combination Sum 🟡 — https://leetcode.com/problems/combination-sum
+Combination Sum II 🟡 — https://leetcode.com/problems/combination-sum-ii
+Combination Sum III 🟡 — https://leetcode.com/problems/combination-sum-iii
+N-Queens 🔴 — https://leetcode.com/problems/n-queens
+N-Queens II 🔴 — https://leetcode.com/problems/n-queens-ii
+Sudoku Solver 🔴 — https://leetcode.com/problems/sudoku-solver
+TOPIC 5 — TWO POINTERS
+Pattern: Opposite Ends (Left <-> Right)
+
+Two Sum II - Input Array Is Sorted 🟡 — https://leetcode.com/problems/two-sum-ii-input-array-is-sorted
+Container With Most Water 🟡 — https://leetcode.com/problems/container-with-most-water
+Trapping Rain Water 🔴 — https://leetcode.com/problems/trapping-rain-water
+Pattern: Merge Two Sorted Array / Sequence
+
+Merge Sorted Array 🟢 — https://leetcode.com/problems/merge-sorted-array
+Interval List Intersections 🟡 — https://leetcode.com/problems/interval-list-intersections
+Pattern: Fixed + Two Pointers
+
+3Sum 🟡 — https://leetcode.com/problems/3sum
+3Sum Closest 🟡 — https://leetcode.com/problems/3sum-closest
+4Sum 🟡 — https://leetcode.com/problems/4sum
+TOPIC 6 — SLIDING WINDOW
+Pattern: Fixed Size Window
+
+Maximum Average Subarray I 🟢 — https://leetcode.com/problems/maximum-average-subarray-i
+Number of Sub-Arrays of Size K and Average >= Threshold 🟡 — https://leetcode.com/problems/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold
+Maximum Sum of Distinct Subarrays With Length K 🟡 — https://leetcode.com/problems/maximum-sum-of-distinct-subarrays-with-length-k
+Pattern: Variable Size Window
+
+Longest Subarray of 1's After Deleting One Element 🟡 — https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element
+Max Consecutive Ones III 🟡 — https://leetcode.com/problems/max-consecutive-ones-iii
+Fruit Into Baskets 🟡 — https://leetcode.com/problems/fruit-into-baskets
+Binary Subarrays With Sum 🟡 — https://leetcode.com/problems/binary-subarrays-with-sum
+Count Number of Nice Subarrays 🟡 — https://leetcode.com/problems/count-number-of-nice-subarrays
+Subarray Product Less Than K 🟡 — https://leetcode.com/problems/subarray-product-less-than-k
+Subarrays With K Different Integers 🔴 — https://leetcode.com/problems/subarrays-with-k-different-integers
+Pattern: Sliding Window on Strings
+
+Maximum Number of Vowels in a Substring of Given Length 🟡 — https://leetcode.com/problems/maximum-number-of-vowels-in-a-substring-of-given-length
+Longest Substring Without Repeating Characters 🟡 — https://leetcode.com/problems/longest-substring-without-repeating-characters
+Longest Repeating Character Replacement 🟡 — https://leetcode.com/problems/longest-repeating-character-replacement
+Find All Anagrams in a String 🟡 — https://leetcode.com/problems/find-all-anagrams-in-a-string
+Minimum Window Substring 🔴 — https://leetcode.com/problems/minimum-window-substring
+TOPIC 7 — STACK & QUEUES
+Pattern: Implementation
+
+Min Stack 🟡 — https://leetcode.com/problems/min-stack
+Design a Stack With Increment Operation 🟡 — https://leetcode.com/problems/design-a-stack-with-increment-operation
+Design Circular Queue 🟡 — https://leetcode.com/problems/design-circular-queue
+Design Front Middle Back Queue 🟡 — https://leetcode.com/problems/design-front-middle-back-queue
+Pattern: Expression Evaluation
+
+Evaluate Reverse Polish Notation 🟡 — https://leetcode.com/problems/evaluate-reverse-polish-notation
+Number of Atoms 🔴 — https://leetcode.com/problems/number-of-atoms
+Basic Calculator 🔴 — https://leetcode.com/problems/basic-calculator
+Pattern: Parentheses Processing
+
+Longest Valid Parentheses 🔴 — https://leetcode.com/problems/longest-valid-parentheses
+Minimum Remove to Make Valid Parentheses 🟡 — https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses
+Minimum Add to Make Parentheses Valid 🟡 — https://leetcode.com/problems/minimum-add-to-make-parentheses-valid
+Pattern: Monotonic Stacks
+
+Next Greater Element I 🟢 — https://leetcode.com/problems/next-greater-element-i
+Next Greater Element II 🟡 — https://leetcode.com/problems/next-greater-element-ii
+Largest Rectangle in Histogram 🔴 — https://leetcode.com/problems/largest-rectangle-in-histogram
+Maximal Rectangle 🔴 — https://leetcode.com/problems/maximal-rectangle
+Daily Temperatures 🟡 — https://leetcode.com/problems/daily-temperatures
+Sum of Subarray Minimums 🟡 — https://leetcode.com/problems/sum-of-subarray-minimums
+Sum of Subarray Ranges 🟡 — https://leetcode.com/problems/sum-of-subarray-ranges
+Asteroid Collision 🟡 — https://leetcode.com/problems/asteroid-collision
+TOPIC 8 — LINKED LIST
+Pattern: Fast & Slow Pointers
+
+Middle of the Linked List 🟢 — https://leetcode.com/problems/middle-of-the-linked-list
+Linked List Cycle 🟢 — https://leetcode.com/problems/linked-list-cycle
+Linked List Cycle II 🟡 — https://leetcode.com/problems/linked-list-cycle-ii
+Pattern: Node Rearrangements
+
+Remove Nth Node from End of List 🟡 — https://leetcode.com/problems/remove-nth-node-from-end-of-list
+Swap Nodes in Pairs 🟡 — https://leetcode.com/problems/swap-nodes-in-pairs
+Odd Even Linked List 🟡 — https://leetcode.com/problems/odd-even-linked-list
+Pattern: Reversal
+
+Reverse Linked List 🟢 — https://leetcode.com/problems/reverse-linked-list
+Reverse Linked List II 🟡 — https://leetcode.com/problems/reverse-linked-list-ii
+Reverse Nodes in k-Group 🟡 — https://leetcode.com/problems/reverse-nodes-in-k-group
+Pattern: Merge & Multiple Lists
+
+Merge Two Sorted Lists 🟢 — https://leetcode.com/problems/merge-two-sorted-lists
+Merge k Sorted Lists 🔴 — https://leetcode.com/problems/merge-k-sorted-lists
+Intersection of Two Linked Lists 🟢 — https://leetcode.com/problems/intersection-of-two-linked-lists
+Add Two Numbers 🟡 — https://leetcode.com/problems/add-two-numbers
+TOPIC 9 — TREES
+Pattern: Traversal (BFS / DFS)
+
+Binary Tree Level Order Traversal 🟡 — https://leetcode.com/problems/binary-tree-level-order-traversal
+Binary Tree Zigzag Level Order Traversal 🟡 — https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal
+Add One Row to Tree 🟡 — https://leetcode.com/problems/add-one-row-to-tree
+Pattern: Depth / Height Based
+
+Maximum Depth of Binary Tree 🟢 — https://leetcode.com/problems/maximum-depth-of-binary-tree
+Minimum Depth of Binary Tree 🟢 — https://leetcode.com/problems/minimum-depth-of-binary-tree
+Maximum Depth of N-ary Tree 🟢 — https://leetcode.com/problems/maximum-depth-of-n-ary-tree
+Pattern: Comparison
+
+Same Tree 🟢 — https://leetcode.com/problems/same-tree
+Symmetric Tree 🟢 — https://leetcode.com/problems/symmetric-tree
+Leaf-Similar Trees 🟢 — https://leetcode.com/problems/leaf-similar-trees
+Pattern: Root to Leaves
+
+Sum Root to Leaf Numbers 🟡 — https://leetcode.com/problems/sum-root-to-leaf-numbers
+Sum of Root to Leaf Binary Numbers 🟢 — https://leetcode.com/problems/sum-of-root-to-leaf-binary-numbers
+Binary Tree Paths 🟢 — https://leetcode.com/problems/binary-tree-paths
+Path Sum 🟢 — https://leetcode.com/problems/path-sum
+Pattern: Ancestor
+
+Lowest Common Ancestor of a Binary Tree 🟡 — https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree
+Lowest Common Ancestor of Deepest Leaves 🟡 — https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves
+Kth Ancestor of a Tree Node 🔴 — https://leetcode.com/problems/kth-ancestor-of-a-tree-node
+Maximum Difference Between Node and Ancestor 🟡 — https://leetcode.com/problems/maximum-difference-between-node-and-ancestor
+Pattern: Binary Search Tree (BST)
+
+Search in a Binary Search Tree 🟢 — https://leetcode.com/problems/search-in-a-binary-search-tree
+Validate Binary Search Tree 🟡 — https://leetcode.com/problems/validate-binary-search-tree
+Convert Sorted Array to Binary Search Tree 🟢 — https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree
+Minimum Absolute Difference in BST 🟢 — https://leetcode.com/problems/minimum-absolute-difference-in-bst
+Kth Smallest Element in a BST 🟡 — https://leetcode.com/problems/kth-smallest-element-in-a-bst
+Lowest Common Ancestor of a Binary Search Tree 🟡 — https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree
+TOPIC 10 — BINARY SEARCH
+Pattern: Classic Binary Search on Sorted Arrays
+
+Binary Search 🟢 — https://leetcode.com/problems/binary-search
+Search Insert Position 🟢 — https://leetcode.com/problems/search-insert-position
+Find First and Last Position of Element in Sorted Array 🟡 — https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array
+Median of Two Sorted Arrays 🔴 — https://leetcode.com/problems/median-of-two-sorted-arrays
+Pattern: Binary Search on Answer
+
+Koko Eating Bananas 🟡 — https://leetcode.com/problems/koko-eating-bananas
+Capacity to Ship Packages Within D Days 🟡 — https://leetcode.com/problems/capacity-to-ship-packages-within-d-days
+Minimum Number of Days to Make m Bouquets 🟡 — https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets
+Maximum Running Time of N Computers 🔴 — https://leetcode.com/problems/maximum-running-time-of-n-computers
+Pattern: Binary Search on Rotated / Modified Sorted Arrays
+
+Search in Rotated Sorted Array 🟡 — https://leetcode.com/problems/search-in-rotated-sorted-array
+Search in Rotated Sorted Array II 🟡 — https://leetcode.com/problems/search-in-rotated-sorted-array-ii
+Find Minimum in Rotated Sorted Array 🟡 — https://leetcode.com/problems/find-minimum-in-rotated-sorted-array
+Find Minimum in Rotated Sorted Array II 🔴 — https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii
+Pattern: Binary Search on Matrix
+
+Search a 2D Matrix 🟡 — https://leetcode.com/problems/search-a-2d-matrix
+Search a 2D Matrix II 🟡 — https://leetcode.com/problems/search-a-2d-matrix-ii
+Kth Smallest Element in a Sorted Matrix 🟡 — https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix
+TOPIC 11 — HEAP (PRIORITY QUEUE)
+Pattern: Top K
+
+Kth Largest Element in an Array 🟡 — https://leetcode.com/problems/kth-largest-element-in-an-array
+Top K Frequent Words 🟡 — https://leetcode.com/problems/top-k-frequent-words
+K Closest Points to Origin 🟡 — https://leetcode.com/problems/k-closest-points-to-origin
+Pattern: Merge K Sorted
+
+Find K Pairs With Smallest Sums 🟡 — https://leetcode.com/problems/find-k-pairs-with-smallest-sums
+Smallest Range Covering Elements From K Lists 🔴 — https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists
+Pattern: Two Heaps
+
+Find Median From Data Stream 🔴 — https://leetcode.com/problems/find-median-from-data-stream
+IPO 🔴 — https://leetcode.com/problems/ipo
+Sliding Window Median 🔴 — https://leetcode.com/problems/sliding-window-median
+Pattern: Finding Minimums
+
+Minimum Cost to Hire K Workers 🔴 — https://leetcode.com/problems/minimum-cost-to-hire-k-workers
+Minimum Number of Refueling Stops 🔴 — https://leetcode.com/problems/minimum-number-of-refueling-stops
+Task Scheduler 🟡 — https://leetcode.com/problems/task-scheduler
+TOPIC 12 — GREEDY
+Pattern: Local Optimal Selection
+
+Jump Game 🟡 — https://leetcode.com/problems/jump-game
+Jump Game II 🟡 — https://leetcode.com/problems/jump-game-ii
+Gas Station 🟡 — https://leetcode.com/problems/gas-station
+Wiggle Subsequence 🟡 — https://leetcode.com/problems/wiggle-subsequence
+Pattern: Distribution / Resource Allocation
+
+Minimum Cost to Move Chips to the Same Position 🟢 — https://leetcode.com/problems/minimum-cost-to-move-chips-to-the-same-position
+Assign Cookies 🟢 — https://leetcode.com/problems/assign-cookies
+Candy 🔴 — https://leetcode.com/problems/candy
+Pattern: Number Construction
+
+Remove K Digits 🟡 — https://leetcode.com/problems/remove-k-digits
+Monotone Increasing Digits 🟡 — https://leetcode.com/problems/monotone-increasing-digits
+Pattern: Sort then Apply Greedy
+
+Queue Reconstruction by Height 🟡 — https://leetcode.com/problems/queue-reconstruction-by-height
+Boats to Save People 🟡 — https://leetcode.com/problems/boats-to-save-people
+Two City Scheduling 🟡 — https://leetcode.com/problems/two-city-scheduling
+Car Pooling 🟡 — https://leetcode.com/problems/car-pooling
+TOPIC 13 — DYNAMIC PROGRAMMING
+Pattern: 1D DP
+
+Climbing Stairs 🟢 — https://leetcode.com/problems/climbing-stairs
+House Robber 🟡 — https://leetcode.com/problems/house-robber
+House Robber II 🟡 — https://leetcode.com/problems/house-robber-ii
+Coin Change 🟡 — https://leetcode.com/problems/coin-change
+Coin Change II 🟡 — https://leetcode.com/problems/coin-change-ii
+Decode Ways 🟡 — https://leetcode.com/problems/decode-ways
+Combination Sum IV 🟡 — https://leetcode.com/problems/combination-sum-iv
+Pattern: Grid DP
+
+Unique Paths 🟡 — https://leetcode.com/problems/unique-paths
+Unique Paths II 🟡 — https://leetcode.com/problems/unique-paths-ii
+Minimum Path Sum 🟡 — https://leetcode.com/problems/minimum-path-sum
+Maximal Square 🟡 — https://leetcode.com/problems/maximal-square
+Count Square Submatrices With All Ones 🟡 — https://leetcode.com/problems/count-square-submatrices-with-all-ones
+Dungeon Game 🟡 — https://leetcode.com/problems/dungeon-game
+Pattern: Knapsack
+
+Target Sum 🟡 — https://leetcode.com/problems/target-sum
+Ones and Zeroes 🟡 — https://leetcode.com/problems/ones-and-zeroes
+Partition Equal Subset Sum 🟡 — https://leetcode.com/problems/partition-equal-subset-sum
+Partition Array Into Two Arrays To Minimize Sum Difference 🔴 — https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference
+Find the Sum of the Power of All Subsequences 🔴 — https://leetcode.com/problems/find-the-sum-of-the-power-of-all-subsequences
+Pattern: LCS (Longest Common Subsequence)
+
+Longest Common Subsequence 🟡 — https://leetcode.com/problems/longest-common-subsequence
+Longest Palindromic Subsequence 🟡 — https://leetcode.com/problems/longest-palindromic-subsequence
+Edit Distance 🟡 — https://leetcode.com/problems/edit-distance
+Shortest Common Supersequence 🔴 — https://leetcode.com/problems/shortest-common-supersequence
+Regular Expression Matching 🔴 — https://leetcode.com/problems/regular-expression-matching
+Distinct Subsequences 🔴 — https://leetcode.com/problems/distinct-subsequences
+Wildcard Matching 🔴 — https://leetcode.com/problems/wildcard-matching
+Pattern: LIS (Longest Increasing Subsequence)
+
+Longest Increasing Subsequence 🟡 — https://leetcode.com/problems/longest-increasing-subsequence
+Number of Longest Increasing Subsequence 🟡 — https://leetcode.com/problems/number-of-longest-increasing-subsequence
+Longest Arithmetic Subsequence 🟡 — https://leetcode.com/problems/longest-arithmetic-subsequence
+Largest Divisible Subset 🟡 — https://leetcode.com/problems/largest-divisible-subset
+Make Array Strictly Increasing 🔴 — https://leetcode.com/problems/make-array-strictly-increasing
+Russian Doll Envelopes 🔴 — https://leetcode.com/problems/russian-doll-envelopes
+Pattern: Palindrome DP
+
+Palindrome Partitioning 🟡 — https://leetcode.com/problems/palindrome-partitioning
+Palindrome Partitioning II 🔴 — https://leetcode.com/problems/palindrome-partitioning-ii
+Minimum Insertion Steps to Make a String Palindrome 🔴 — https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome
+Count Different Palindromic Subsequences 🔴 — https://leetcode.com/problems/count-different-palindromic-subsequences
+Pattern: Stock DP
+
+Best Time to Buy and Sell Stock 🟢 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock
+Best Time to Buy and Sell Stock II 🟡 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii
+Best Time to Buy and Sell Stock III 🔴 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii
+Best Time to Buy and Sell Stock IV 🔴 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv
+Best Time to Buy and Sell Stock With Cooldown 🟡 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown
+Best Time to Buy and Sell Stock With Transaction Fee 🟡 — https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee
+Pattern: Partition DP
+
+Stone Game 🟡 — https://leetcode.com/problems/stone-game
+Stone Game II 🟡 — https://leetcode.com/problems/stone-game-ii
+Stone Game III 🔴 — https://leetcode.com/problems/stone-game-iii
+Minimum Cost to Cut a Stick 🔴 — https://leetcode.com/problems/minimum-cost-to-cut-a-stick
+Burst Balloons 🔴 — https://leetcode.com/problems/burst-balloons
+Remove Boxes 🔴 — https://leetcode.com/problems/remove-boxes
+Pattern: Tree DP
+
+House Robber III 🟡 — https://leetcode.com/problems/house-robber-iii
+Binary Tree Maximum Path Sum 🔴 — https://leetcode.com/problems/binary-tree-maximum-path-sum
+Sum of Distances in Tree 🔴 — https://leetcode.com/problems/sum-of-distances-in-tree
+Pattern: Bitmask DP
+
+Can I Win 🟡 — https://leetcode.com/problems/can-i-win
+Partition to K Equal Sum Subsets 🟡 — https://leetcode.com/problems/partition-to-k-equal-sum-subsets
+Shortest Path Visiting All Nodes 🔴 — https://leetcode.com/problems/shortest-path-visiting-all-nodes
+TOPIC 14 — GRAPH
+Pattern: Graph Traversal
+
+Flood Fill 🟢 — https://leetcode.com/problems/flood-fill
+Keys and Rooms 🟡 — https://leetcode.com/problems/keys-and-rooms
+Number of Islands 🟡 — https://leetcode.com/problems/number-of-islands
+Surrounded Regions 🟡 — https://leetcode.com/problems/surrounded-regions
+Pacific Atlantic Water Flow 🟡 — https://leetcode.com/problems/pacific-atlantic-water-flow
+Making a Large Island 🔴 — https://leetcode.com/problems/making-a-large-island
+Pattern: Connected Components
+
+Number of Provinces 🟡 — https://leetcode.com/problems/number-of-provinces
+Number of Operations to Make Network Connected 🟡 — https://leetcode.com/problems/number-of-operations-to-make-network-connected
+Minimum Number of Days to Disconnect Island 🔴 — https://leetcode.com/problems/minimum-number-of-days-to-disconnect-island
+Pattern: Multi Source BFS
+
+01 Matrix 🟡 — https://leetcode.com/problems/01-matrix
+Rotting Oranges 🟡 — https://leetcode.com/problems/rotting-oranges
+As Far from Land as Possible 🟡 — https://leetcode.com/problems/as-far-from-land-as-possible
+Escape the Spreading Fire 🔴 — https://leetcode.com/problems/escape-the-spreading-fire
+Pattern: Topological Sort
+
+Course Schedule 🟡 — https://leetcode.com/problems/course-schedule
+Course Schedule II 🟡 — https://leetcode.com/problems/course-schedule-ii
+Find Eventual Safe States 🟡 — https://leetcode.com/problems/find-eventual-safe-states
+Pattern: Union Find
+
+Redundant Connection 🟡 — https://leetcode.com/problems/redundant-connection
+Accounts Merge 🟡 — https://leetcode.com/problems/accounts-merge
+Checking Existence of Edge Length Limited Paths 🔴 — https://leetcode.com/problems/checking-existence-of-edge-length-limited-paths
+Remove Max Number of Edges to Keep Graph Fully Traversable 🔴 — https://leetcode.com/problems/remove-max-number-of-edges-to-keep-graph-fully-traversable
+Pattern: Shortest Path
+
+Shortest Path in Binary Matrix 🟡 — https://leetcode.com/problems/shortest-path-in-binary-matrix
+Network Delay Time 🟡 — https://leetcode.com/problems/network-delay-time
+Path With Minimum Effort 🟡 — https://leetcode.com/problems/path-with-minimum-effort
+Cheapest Flights Within K Stops 🟡 — https://leetcode.com/problems/cheapest-flights-within-k-stops
+Number of Ways to Arrive At Destination 🟡 — https://leetcode.com/problems/number-of-ways-to-arrive-at-destination
+Pattern: Bipartite Graph / Coloring
+
+Is Graph Bipartite? 🟡 — https://leetcode.com/problems/is-graph-bipartite
+Possible Bipartition 🟡 — https://leetcode.com/problems/possible-bipartition
+Pattern: Minimum Spanning Tree
+
+Minimum Cost to Connect All Points 🟡 — https://leetcode.com/problems/min-cost-to-connect-all-points
+Pattern: Grid as Graph
+
+Number of Closed Islands 🟡 — https://leetcode.com/problems/number-of-closed-islands
+Number of Enclaves 🟡 — https://leetcode.com/problems/number-of-enclaves
+Swim in Rising Water 🔴 — https://leetcode.com/problems/swim-in-rising-water
+TOPIC 15 — TRIES
+Pattern: Implementation
+
+Implement Trie (Prefix Tree) 🟡 — https://leetcode.com/problems/implement-trie-prefix-tree
+Pattern: Prefix / Suffix Queries
+
+Prefix and Suffix Search 🔴 — https://leetcode.com/problems/prefix-and-suffix-search
+Longest Word in Dictionary 🟡 — https://leetcode.com/problems/longest-word-in-dictionary
+Longest Word in Dictionary through Deletion 🟡 — https://leetcode.com/problems/longest-word-in-dictionary-through-deleting
+Pattern: XOR Trie
+
+Maximum XOR of Two Numbers in an Array 🟡 — https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array
+Maximum XOR With an Element from Array 🔴 — https://leetcode.com/problems/maximum-xor-with-an-element-from-array
+Count Pairs With XOR in a Range 🔴 — https://leetcode.com/problems/count-pairs-with-xor-in-a-range
