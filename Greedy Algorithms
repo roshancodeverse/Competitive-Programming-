@@ -1,0 +1,441 @@
+Greedy is the hardest pattern to recognize.
+
+Not because the code is complex — most greedy solutions are short.
+The hard part is trusting that the local choice is always safe.
+
+Unlike DP, Binary Search, or Sliding Window — greedy does NOT have
+a fixed template or a fixed set of patterns.
+Every problem has its own greedy insight that you need to find.
+
+What I am sharing here are the MOST COMMON greedy patterns seen on LeetCode.
+These cover the majority of greedy problems you will encounter,
+but greedy is a way of thinking, not a formula to memorize.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT MAKES A PROBLEM GREEDY?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Greedy works when: making the locally best choice at each step
+leads to the globally best answer.
+
+Before coding, ask yourself:
+"If I always pick the best option right now,
+can a future choice ever make me regret this decision?"
+
+If YES → greedy fails, use DP instead.
+If NO → greedy is safe, and it will be O(n) or O(n log n).
+
+The hardest skill in greedy is proving your choice is safe.
+Ask: "What is the WORST thing that could happen if I pick this?"
+If the answer is "nothing — it can only help or stay neutral", greedy works.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE 4 MOST COMMON GREEDY PATTERNS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Again — these are the most frequently seen patterns, not an exhaustive list.
+Greedy problems outside these patterns still exist. But if you master
+these 4, you will handle the vast majority of what LeetCode throws at you.
+
+PATTERN 1 — INTERVAL GREEDY → sort by end time, take what fits earliest
+PATTERN 2 — SORT + ASSIGN → sort in a clever order, assign in that order
+PATTERN 3 — RUNNING GREEDY → scan left to right, track a running value
+PATTERN 4 — HEAP GREEDY → always pick the most urgent item available
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATTERN 1 — INTERVAL GREEDY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Select maximum number of non-overlapping activities
+→ Minimum arrows/points to cover all intervals
+→ Can you reach the end? / Minimum jumps to reach end?
+
+The key insight: always pick the activity that ENDS the earliest.
+Why? It leaves the maximum room for future activities.
+Picking an activity that ends later blocks more future choices — never better.
+
+EXAMPLE — Non-overlapping Intervals
+https://leetcode.com/problems/non-overlapping-intervals
+
+Find minimum number of intervals to REMOVE so none overlap.
+Equivalently: find maximum number of non-overlapping intervals to KEEP.
+Sort by END time. Greedily keep each interval if it doesn't overlap
+with the last kept one (start >= lastEnd).
+Removed = total - kept.
+int eraseOverlapIntervals(vector<vector<int>>& intervals) {
+    sort(intervals.begin(), intervals.end(),
+         [](auto& a, auto& b){ return a[1] < b[1]; });  // sort by end
+
+    int kept = 1, lastEnd = intervals[0][1];
+    for (int i = 1; i < intervals.size(); i++) {
+        if (intervals[i][0] >= lastEnd) {  // no overlap → keep it
+            kept++;
+            lastEnd = intervals[i][1];
+        }
+    }
+    return intervals.size() - kept;
+}
+WHY END TIME? If two intervals both fit, the one ending earlier is always
+at least as good. It takes up less "future space."
+
+EXAMPLE — Minimum Number of Arrows to Burst Balloons
+https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons
+
+Same logic as non-overlapping intervals.
+Sort by end. Shoot an arrow at the end of the first balloon.
+Any balloon whose start <= this end is also burst (same arrow).
+When a balloon starts after the current arrow → fire a new arrow.
+int findMinArrowShots(vector<vector<int>>& points) {
+    sort(points.begin(), points.end(),
+         [](auto& a, auto& b){ return a[1] < b[1]; });
+
+    int arrows = 1, arrowPos = points[0][1];
+    for (int i = 1; i < points.size(); i++) {
+        if (points[i][0] > arrowPos) {
+            arrows++;
+            arrowPos = points[i][1];
+        }
+    }
+    return arrows;
+}
+EXAMPLE — Jump Game
+https://leetcode.com/problems/jump-game
+
+Can you reach the last index?
+Track the farthest index reachable so far.
+If you're at an index beyond farthest → stuck, return false.
+bool canJump(vector<int>& nums) {
+    int farthest = 0;
+    for (int i = 0; i < nums.size(); i++) {
+        if (i > farthest) return false;
+        farthest = max(farthest, i + nums[i]);
+    }
+    return true;
+}
+EXAMPLE — Jump Game II (minimum jumps)
+https://leetcode.com/problems/jump-game-ii
+
+Track the farthest you can reach within the CURRENT jump.
+When you exhaust the current jump range → you must jump.
+At each forced jump, extend range to the farthest reachable so far.
+int jump(vector<int>& nums) {
+    int jumps = 0, curEnd = 0, farthest = 0;
+    for (int i = 0; i < nums.size() - 1; i++) {
+        farthest = max(farthest, i + nums[i]);
+        if (i == curEnd) {
+            jumps++;
+            curEnd = farthest;
+        }
+    }
+    return jumps;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATTERN 2 — SORT + ASSIGN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Match two groups together optimally
+→ Assign resources to tasks in a specific order
+→ The trick is deciding WHAT to sort by
+
+The key question: "In what order should I process things
+so that each local decision is obviously correct?"
+
+EXAMPLE — Assign Cookies
+https://leetcode.com/problems/assign-cookies
+
+Greedily satisfy the least hungry child with the smallest sufficient cookie.
+Sort both. For each child, give the smallest cookie that satisfies them.
+int findContentChildren(vector<int>& g, vector<int>& s) {
+    sort(g.begin(), g.end());
+    sort(s.begin(), s.end());
+    int child = 0, cookie = 0;
+    while (child < g.size() && cookie < s.size()) {
+        if (s[cookie] >= g[child]) child++;
+        cookie++;
+    }
+    return child;
+}
+EXAMPLE — Two City Scheduling
+https://leetcode.com/problems/two-city-scheduling
+
+Send n people to city A and n to city B. Minimize total cost.
+Sort by (costA - costB). People cheapest relative to city B come first.
+Send first half to A, second half to B.
+int twoCitySchedCost(vector<vector<int>>& costs) {
+    sort(costs.begin(), costs.end(),
+         [](auto& a, auto& b){ return (a[0]-a[1]) < (b[0]-b[1]); });
+    int total = 0, n = costs.size() / 2;
+    for (int i = 0; i < n; i++)   total += costs[i][0];
+    for (int i = n; i < 2*n; i++) total += costs[i][1];
+    return total;
+}
+EXAMPLE — Largest Number
+https://leetcode.com/problems/largest-number
+
+Custom sort: compare ab vs ba as strings.
+If ab > ba → a should come before b.
+string largestNumber(vector<int>& nums) {
+    vector<string> strs;
+    for (int n : nums) strs.push_back(to_string(n));
+    sort(strs.begin(), strs.end(),
+         [](string& a, string& b){ return a+b > b+a; });
+    if (strs[0] == "0") return "0";
+    string res;
+    for (string& s : strs) res += s;
+    return res;
+}
+EXAMPLE — Candy
+https://leetcode.com/problems/candy
+
+Two-pass greedy. Each pass handles one direction of constraint.
+Pass 1 (left to right): if rating[i] > rating[i-1] → candies[i] = candies[i-1] + 1.
+Pass 2 (right to left): if rating[i] > rating[i+1] → candies[i] = max(candies[i], candies[i+1] + 1).
+int candy(vector<int>& ratings) {
+    int n = ratings.size();
+    vector<int> candies(n, 1);
+    for (int i = 1; i < n; i++)
+        if (ratings[i] > ratings[i-1]) candies[i] = candies[i-1] + 1;
+    for (int i = n-2; i >= 0; i--)
+        if (ratings[i] > ratings[i+1]) candies[i] = max(candies[i], candies[i+1] + 1);
+    return accumulate(candies.begin(), candies.end(), 0);
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATTERN 3 — RUNNING GREEDY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Process elements left to right, track a running value
+→ Make a greedy decision at each step based on that running value
+→ Problems that "reset" when a condition is violated
+
+EXAMPLE — Gas Station
+https://leetcode.com/problems/gas-station
+
+If total gas >= total cost, a solution always exists.
+If tank goes negative from some start point → that start (and every
+point between) cannot be the answer. Reset and try starting fresh.
+int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+    int total = 0, tank = 0, start = 0;
+    for (int i = 0; i < gas.size(); i++) {
+        int gain = gas[i] - cost[i];
+        total += gain;
+        tank  += gain;
+        if (tank < 0) { start = i + 1; tank = 0; }
+    }
+    return total >= 0 ? start : -1;
+}
+EXAMPLE — Partition Labels
+https://leetcode.com/problems/partition-labels
+
+Each partition must extend to include the LAST occurrence of
+every character seen so far. When current index == farthest → end partition.
+vector<int> partitionLabels(string s) {
+    int last[26] = {};
+    for (int i = 0; i < s.size(); i++) last[s[i]-'a'] = i;
+
+    vector<int> res;
+    int start = 0, end = 0;
+    for (int i = 0; i < s.size(); i++) {
+        end = max(end, last[s[i]-'a']);
+        if (i == end) { res.push_back(end - start + 1); start = i + 1; }
+    }
+    return res;
+}
+EXAMPLE — Best Time to Buy and Sell Stock II (multiple transactions)
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii
+
+Collect every upward price movement. Sum all positive day-to-day gains.
+int maxProfit(vector<int>& prices) {
+    int profit = 0;
+    for (int i = 1; i < prices.size(); i++)
+        profit += max(0, prices[i] - prices[i-1]);
+    return profit;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATTERN 4 — HEAP GREEDY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ At each step, you need the most urgent / most frequent / highest value item
+→ The best current choice changes dynamically as you process
+→ A simple sort is not enough because what's "best" depends on current state
+
+EXAMPLE — Task Scheduler
+https://leetcode.com/problems/task-scheduler
+
+Always run the most frequent remaining task. No sorting needed —
+only frequencies matter. A formula covers the key insight.
+int leastInterval(vector<char>& tasks, int n) {
+    int freq[26] = {};
+    for (char c : tasks) freq[c-'A']++;
+    int maxFreq  = *max_element(freq, freq+26);
+    int maxCount = count(freq, freq+26, maxFreq);
+    return max((int)tasks.size(), (maxFreq-1)*(n+1) + maxCount);
+}
+EXAMPLE — Reorganize String
+https://leetcode.com/problems/reorganize-string
+
+Always place the most frequent character that is NOT the same as the previous.
+Max-heap gives the most frequent available at each step.
+string reorganizeString(string s) {
+    int freq[26] = {};
+    for (char c : s) freq[c-'a']++;
+    priority_queue<pair<int,char>> pq;
+    for (int i = 0; i < 26; i++)
+        if (freq[i]) pq.push({freq[i], 'a'+i});
+
+    string res;
+    while (pq.size() >= 2) {
+        auto [f1, c1] = pq.top(); pq.pop();
+        auto [f2, c2] = pq.top(); pq.pop();
+        res += c1; res += c2;
+        if (f1-1) pq.push({f1-1, c1});
+        if (f2-1) pq.push({f2-1, c2});
+    }
+    if (!pq.empty()) {
+        if (pq.top().first > 1) return "";
+        res += pq.top().second;
+    }
+    return res;
+}
+EXAMPLE — IPO (Hard)
+https://leetcode.com/problems/ipo
+
+Among all projects you can currently afford, pick the most profitable.
+Sort by capital needed. Unlock projects as your capital grows.
+Max-heap of profits for currently affordable projects.
+int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {
+    vector<pair<int,int>> projects;
+    for (int i = 0; i < profits.size(); i++)
+        projects.push_back({capital[i], profits[i]});
+    sort(projects.begin(), projects.end());
+
+    priority_queue<int> pq;
+    int i = 0;
+    while (k--) {
+        while (i < projects.size() && projects[i].first <= w)
+            pq.push(projects[i++].second);
+        if (pq.empty()) break;
+        w += pq.top(); pq.pop();
+    }
+    return w;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH PATTERN — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Does "best available right now" change dynamically as you process?
+→ YES → Pattern 4 (Heap Greedy)
+
+Does it involve time intervals, ranges, or reachability?
+→ YES → Pattern 1 (Interval Greedy — sort by END time)
+
+Does it involve a running total that resets or extends?
+→ YES → Pattern 3 (Running Greedy — scan left to right)
+
+Can you solve it by sorting in a specific order and assigning?
+→ YES → Pattern 2 (Sort + Assign — think hard about WHAT to sort by)
+
+GREEDY VS DP:
+Coin Change → greedy fails (picking largest coin can block valid completion).
+Jump Game → greedy works (extending farthest never blocks a better option).
+The test: does the current choice ever prevent a better future choice?
+YES → DP. NO → greedy.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Using greedy when DP is needed
+Coin Change with greedy: picks largest coin first → wrong for many inputs.
+Always ask: can a future step invalidate this choice? If yes → use DP.
+
+MISTAKE 2 — Sorting by the wrong key in interval problems
+Sort by START → useful for merging intervals.
+Sort by END → correct for activity selection and arrow problems.
+Mixing these gives wrong greedy decisions.
+
+MISTAKE 3 — Forgetting the two-pass approach in Candy
+One left-to-right pass handles left-neighbor constraints.
+One right-to-left pass handles right-neighbor constraints.
+A single pass cannot satisfy both directions at once.
+
+MISTAKE 4 — Thinking greedy always needs sorting
+Gas Station and Jump Game require no sorting.
+The greedy insight is in the running variable and reset logic.
+
+MISTAKE 5 — Not verifying feasibility in heap greedy problems
+Reorganize String: if max frequency > ceil(n/2) → impossible.
+Always check if a valid arrangement can exist before building it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pattern 1 — Interval Greedy
+Jump Game
+https://leetcode.com/problems/jump-game
+
+Jump Game II
+https://leetcode.com/problems/jump-game-ii
+
+Non-overlapping Intervals
+https://leetcode.com/problems/non-overlapping-intervals
+
+Minimum Number of Arrows to Burst Balloons
+https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons
+
+Pattern 2 — Sort + Assign
+Assign Cookies
+https://leetcode.com/problems/assign-cookies
+
+Largest Number
+https://leetcode.com/problems/largest-number
+
+Two City Scheduling
+https://leetcode.com/problems/two-city-scheduling
+
+Candy (Hard)
+https://leetcode.com/problems/candy
+
+Pattern 3 — Running Greedy
+Best Time to Buy and Sell Stock II
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii
+
+Gas Station
+https://leetcode.com/problems/gas-station
+
+Partition Labels
+https://leetcode.com/problems/partition-labels
+
+Pattern 4 — Heap Greedy
+Task Scheduler
+https://leetcode.com/problems/task-scheduler
+
+Reorganize String
+https://leetcode.com/problems/reorganize-string
+
+IPO (Hard)
+https://leetcode.com/problems/ipo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE GREEDY CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Greedy works when → local best never prevents a better future choice
+Greedy fails when → future steps can invalidate the current choice → use DP
+Interval scheduling → sort by END time, keep earliest-ending non-overlapping
+Arrows / coverage → sort by end, one arrow covers until it misses
+Jump reachability → track farthest, force jump when range exhausted
+Match two groups → sort both, match smallest to smallest
+Custom order → compare ab vs ba as strings (Largest Number)
+Two-direction constraint → two separate passes (Candy)
+Running total reset → restart when tank drops below 0 (Gas Station)
+Partition by range → extend until index reaches farthest last occurrence
+Dynamic best choice → max-heap, always pick top
