@@ -1,0 +1,503 @@
+Most linked list problems look completely different on the surface.
+But almost all of them use one of four techniques:
+fast/slow pointers, reversal, two pointers, or node rearrangement.
+
+Recognize the technique and the problem becomes straightforward.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BEFORE YOU START — TWO THINGS TO ALWAYS KNOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The node structure:
+
+struct ListNode {
+    int val;
+    ListNode* next;
+};
+THE DUMMY NODE TRICK — use it on almost every problem.
+Create a dummy node before the head. It eliminates edge cases
+for inserting or removing at the head.
+
+ListNode dummy(0);
+dummy.next = head;
+ListNode* cur = &dummy;
+
+// ... manipulate list ...
+
+return dummy.next;   // new head
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THERE ARE 4 TYPES OF LINKED LIST PROBLEMS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPE 1 — FAST & SLOW POINTERS → cycle, middle, palindrome
+TYPE 2 — REVERSAL → reverse full, partial, in k-groups
+TYPE 3 — TWO POINTER / MERGE → merge sorted, nth from end, intersection
+TYPE 4 — NODE REARRANGEMENT → reorder, partition, split and rejoin
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 1 — FAST & SLOW POINTERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Detect if a cycle exists
+→ Find the start of a cycle
+→ Find the middle of a list
+→ Check if a list is a palindrome
+
+The idea: slow moves 1 step, fast moves 2 steps.
+If there is a cycle, fast will eventually lap slow and they meet.
+If no cycle, fast reaches null first.
+When fast reaches the end → slow is at the middle.
+
+TEMPLATE:
+
+ListNode* slow = head;
+ListNode* fast = head;
+
+while (fast && fast->next) {
+    slow = slow->next;
+    fast = fast->next->next;
+    if (slow == fast) {
+        // cycle detected
+    }
+}
+// no cycle — slow is now at the middle
+EXAMPLE — Linked List Cycle
+https://leetcode.com/problems/linked-list-cycle
+
+bool hasCycle(ListNode* head) {
+    ListNode* slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+EXAMPLE — Linked List Cycle II (find start of cycle)
+https://leetcode.com/problems/linked-list-cycle-ii
+
+After fast and slow meet inside the cycle:
+reset slow to head, keep fast where it is.
+Move both one step at a time.
+Where they meet again = the start of the cycle.
+
+WHY THIS WORKS:
+Let a = distance from head to cycle start.
+Let b = distance from cycle start to meeting point.
+Slow traveled a+b. Fast traveled 2(a+b) = a+b + full cycle.
+So a = full cycle - b = distance from meeting point back to start.
+Moving one pointer from head and one from meeting point → they meet at start.
+
+ListNode* detectCycle(ListNode* head) {
+    ListNode* slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            slow = head;
+            while (slow != fast) {
+                slow = slow->next;
+                fast = fast->next;
+            }
+            return slow;
+        }
+    }
+    return nullptr;
+}
+EXAMPLE — Middle of the Linked List
+https://leetcode.com/problems/middle-of-the-linked-list
+
+When fast reaches the end, slow is at the middle.
+For even-length lists this returns the second middle node.
+
+ListNode* middleNode(ListNode* head) {
+    ListNode* slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    return slow;
+}
+EXAMPLE — Palindrome Linked List
+https://leetcode.com/problems/palindrome-linked-list
+
+Step 1: Find middle using fast/slow.
+Step 2: Reverse the second half.
+Step 3: Compare first half and reversed second half value by value.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 — REVERSAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Reverse the entire list
+→ Reverse a sublist (from position l to r)
+→ Reverse in groups of k
+
+The core reversal — memorize this:
+
+ListNode* prev = nullptr;
+ListNode* cur  = head;
+
+while (cur) {
+    ListNode* next = cur->next;   // 1. save next
+    cur->next = prev;             // 2. reverse pointer
+    prev = cur;                   // 3. advance prev
+    cur = next;                   // 4. advance cur
+}
+return prev;   // new head
+EXAMPLE — Reverse Linked List
+https://leetcode.com/problems/reverse-linked-list
+
+Directly apply the template.
+
+ListNode* reverseList(ListNode* head) {
+    ListNode* prev = nullptr, *cur = head;
+    while (cur) {
+        ListNode* next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+    }
+    return prev;
+}
+EXAMPLE — Reverse Linked List II (positions l to r)
+https://leetcode.com/problems/reverse-linked-list-ii
+
+Step 1: Walk to the node just before position l.
+Step 2: Repeatedly move the node after cur to the front of the sublist.
+
+ListNode* reverseBetween(ListNode* head, int l, int r) {
+    ListNode dummy(0);
+    dummy.next = head;
+    ListNode* prev_node = &dummy;
+
+    for (int i = 1; i < l; i++)
+        prev_node = prev_node->next;
+
+    ListNode* cur = prev_node->next;
+    for (int i = 0; i < r - l; i++) {
+        ListNode* next = cur->next;
+        cur->next = next->next;
+        next->next = prev_node->next;
+        prev_node->next = next;
+    }
+    return dummy.next;
+}
+EXAMPLE — Reverse Nodes in k-Group (Hard)
+https://leetcode.com/problems/reverse-nodes-in-k-group
+
+Reverse every k nodes. Leave remaining nodes (fewer than k) as is.
+Step 1: Check if at least k nodes remain.
+Step 2: Reverse the next k nodes.
+Step 3: Recursively apply to the rest.
+After reversing, head becomes the tail — connect it to the recursive result.
+
+ListNode* reverseKGroup(ListNode* head, int k) {
+    ListNode* cur = head;
+    int count = 0;
+    while (cur && count < k) { cur = cur->next; count++; }
+    if (count < k) return head;   // fewer than k nodes remain
+
+    ListNode* prev = nullptr, *node = head;
+    for (int i = 0; i < k; i++) {
+        ListNode* next = node->next;
+        node->next = prev;
+        prev = node;
+        node = next;
+    }
+    head->next = reverseKGroup(node, k);
+    return prev;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 3 — TWO POINTER / MERGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Merge two or more sorted lists
+→ Find a node at position n from the end
+→ Find where two lists intersect
+
+EXAMPLE — Merge Two Sorted Lists
+https://leetcode.com/problems/merge-two-sorted-lists
+
+Two pointers, one on each list. Pick the smaller each time.
+Dummy node makes the head clean.
+
+ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+    ListNode dummy(0);
+    ListNode* cur = &dummy;
+    while (l1 && l2) {
+        if (l1->val <= l2->val) { cur->next = l1; l1 = l1->next; }
+        else { cur->next = l2; l2 = l2->next; }
+        cur = cur->next;
+    }
+    cur->next = l1 ? l1 : l2;
+    return dummy.next;
+}
+EXAMPLE — Merge k Sorted Lists (Hard)
+https://leetcode.com/problems/merge-k-sorted-lists
+
+Use a min-heap. Push the head of all k lists in.
+Each step: pop smallest, append it, push its next.
+
+ListNode* mergeKLists(vector<ListNode*>& lists) {
+    auto cmp = [](ListNode* a, ListNode* b){ return a->val > b->val; };
+    priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp);
+
+    for (ListNode* l : lists) if (l) pq.push(l);
+
+    ListNode dummy(0);
+    ListNode* cur = &dummy;
+    while (!pq.empty()) {
+        cur->next = pq.top(); pq.pop();
+        cur = cur->next;
+        if (cur->next) pq.push(cur->next);
+    }
+    return dummy.next;
+}
+EXAMPLE — Remove Nth Node From End of List
+https://leetcode.com/problems/remove-nth-node-from-end-of-list
+
+Move fast pointer n+1 steps ahead (using dummy node as start).
+Then move both until fast is null.
+Now slow->next is the node to remove.
+
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+    ListNode dummy(0);
+    dummy.next = head;
+    ListNode* slow = &dummy, *fast = &dummy;
+    for (int i = 0; i <= n; i++) fast = fast->next;
+    while (fast) { slow = slow->next; fast = fast->next; }
+    slow->next = slow->next->next;
+    return dummy.next;
+}
+EXAMPLE — Intersection of Two Linked Lists
+https://leetcode.com/problems/intersection-of-two-linked-lists
+
+Two pointers. When a pointer finishes its list, redirect to the other head.
+They travel the same total distance (lenA + lenB) and meet at the intersection.
+If no intersection, both reach null at the same time.
+
+ListNode* getIntersectionNode(ListNode* headA, ListNode* headB) {
+    ListNode* a = headA, *b = headB;
+    while (a != b) {
+        a = a ? a->next : headB;
+        b = b ? b->next : headA;
+    }
+    return a;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 4 — NODE REARRANGEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Reorder nodes based on index or value
+→ Split the list into parts and rejoin in a different order
+→ Deep copy a list with extra pointers
+
+General approach: split into sub-lists → manipulate each → merge.
+
+EXAMPLE — Odd Even Linked List
+https://leetcode.com/problems/odd-even-linked-list
+
+Separate odd-indexed and even-indexed nodes into two chains.
+Connect the tail of the odd chain to the head of the even chain.
+
+ListNode* oddEvenList(ListNode* head) {
+    if (!head) return head;
+    ListNode* odd = head, *even = head->next, *evenHead = even;
+    while (even && even->next) {
+        odd->next  = even->next;  odd  = odd->next;
+        even->next = odd->next;   even = even->next;
+    }
+    odd->next = evenHead;
+    return head;
+}
+EXAMPLE — Reorder List
+https://leetcode.com/problems/reorder-list
+
+Given: 1→2→3→4→5, produce: 1→5→2→4→3.
+
+Step 1: Find middle (fast/slow pointers).
+Step 2: Reverse the second half.
+Step 3: Merge the two halves alternately.
+
+void reorderList(ListNode* head) {
+    ListNode* slow = head, *fast = head;
+    while (fast->next && fast->next->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    // reverse second half
+    ListNode* prev = nullptr, *cur = slow->next;
+    slow->next = nullptr;   // cut the list in half
+    while (cur) {
+        ListNode* next = cur->next;
+        cur->next = prev;
+        prev = cur;
+        cur = next;
+    }
+    // merge alternately
+    ListNode* l1 = head, *l2 = prev;
+    while (l2) {
+        ListNode* next1 = l1->next, *next2 = l2->next;
+        l1->next = l2;
+        l2->next = next1;
+        l1 = next1;
+        l2 = next2;
+    }
+}
+EXAMPLE — Partition List
+https://leetcode.com/problems/partition-list
+
+Build two separate chains: nodes < x, and nodes >= x.
+Connect the tail of the less chain to the head of the greater chain.
+
+ListNode* partition(ListNode* head, int x) {
+    ListNode lessHead(0), greaterHead(0);
+    ListNode* less = &lessHead, *greater = &greaterHead;
+    while (head) {
+        if (head->val < x) { less->next = head; less = less->next; }
+        else { greater->next = head; greater = greater->next; }
+        head = head->next;
+    }
+    greater->next = nullptr;
+    less->next = greaterHead.next;
+    return lessHead.next;
+}
+EXAMPLE — Copy List with Random Pointer
+https://leetcode.com/problems/copy-list-with-random-pointer
+
+Each node has val, next, and random (can point anywhere).
+
+Step 1: Build a hashmap {original node → cloned node}.
+Step 2: Set next and random on each clone using the map.
+
+Node* copyRandomList(Node* head) {
+    unordered_map<Node*, Node*> mp;
+    Node* cur = head;
+    while (cur) { mp[cur] = new Node(cur->val); cur = cur->next; }
+    cur = head;
+    while (cur) {
+        mp[cur]->next   = mp[cur->next];
+        mp[cur]->random = mp[cur->random];
+        cur = cur->next;
+    }
+    return mp[head];
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH TYPE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Does it ask about cycles, middle node, or palindrome?
+→ YES → Type 1 (Fast & Slow Pointers)
+
+Does it ask to reverse the list, a sublist, or in k-groups?
+→ YES → Type 2 (Reversal)
+
+Does it ask to merge sorted lists, remove nth from end,
+or find intersection?
+→ YES → Type 3 (Two Pointer / Merge)
+
+Does it ask to reorder, rearrange, partition, or deep copy?
+→ YES → Type 4 (Node Rearrangement)
+
+Also ask: might I insert or delete at the head?
+→ YES → use a dummy node.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Not using a dummy node
+Special-casing the head for deletions or insertions creates messy code.
+Just use a dummy node — it makes all positions uniform.
+
+MISTAKE 2 — Losing the next pointer before reversing
+In reversal: ALWAYS save ListNode* next = cur->next
+BEFORE setting cur->next = prev.
+Forgetting this loses the rest of the list permanently.
+
+MISTAKE 3 — Not cutting the list after finding the middle
+When splitting into two halves (e.g. Reorder List, Palindrome):
+set slow->next = nullptr to terminate the first half.
+Without this, the first half still links into the second half.
+
+MISTAKE 4 — Off-by-one in remove nth from end
+Move fast n+1 steps (not n) when using a dummy node as the start.
+This places slow one node before the target, so slow->next is the node to delete.
+
+MISTAKE 5 — Forgetting to set the tail's next to nullptr
+After rearranging or partitioning, the last node in a chain may still
+point to something from the old list. Always set the tail's next = nullptr.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type 1 — Fast & Slow Pointers
+Middle of the Linked List
+https://leetcode.com/problems/middle-of-the-linked-list
+
+Linked List Cycle
+https://leetcode.com/problems/linked-list-cycle
+
+Linked List Cycle II
+https://leetcode.com/problems/linked-list-cycle-ii
+
+Palindrome Linked List
+https://leetcode.com/problems/palindrome-linked-list
+
+Type 2 — Reversal
+Reverse Linked List
+https://leetcode.com/problems/reverse-linked-list
+
+Reverse Linked List II
+https://leetcode.com/problems/reverse-linked-list-ii
+
+Reverse Nodes in k-Group (Hard)
+https://leetcode.com/problems/reverse-nodes-in-k-group
+
+Type 3 — Two Pointer / Merge
+Merge Two Sorted Lists
+https://leetcode.com/problems/merge-two-sorted-lists
+
+Remove Nth Node From End of List
+https://leetcode.com/problems/remove-nth-node-from-end-of-list
+
+Intersection of Two Linked Lists
+https://leetcode.com/problems/intersection-of-two-linked-lists
+
+Merge k Sorted Lists (Hard)
+https://leetcode.com/problems/merge-k-sorted-lists
+
+Type 4 — Node Rearrangement
+Odd Even Linked List
+https://leetcode.com/problems/odd-even-linked-list
+
+Reorder List
+https://leetcode.com/problems/reorder-list
+
+Partition List
+https://leetcode.com/problems/partition-list
+
+Copy List with Random Pointer
+https://leetcode.com/problems/copy-list-with-random-pointer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE LINKED LIST CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cycle, middle, palindrome → Fast & Slow Pointers
+Reverse full / partial → Iterative reversal (3 pointers)
+Merge sorted lists → Two pointers + dummy head
+Nth node from end → Two pointers, n+1 gap
+Intersection of two lists → Swap heads to equalize path length
+Reorder / rearrange → Split + reverse second half + merge
+Deep copy with random ptr → Hashmap (original → clone)
