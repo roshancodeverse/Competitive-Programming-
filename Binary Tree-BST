@@ -1,0 +1,583 @@
+Binary tree problems look very different on the surface.
+
+But they all come down to one question:
+"What do I need from each subtree to answer at this node?"
+
+Get that right and every type becomes solvable with the same thinking.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE NODE STRUCTURE + THE CORE MENTAL MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+};
+THE MENTAL MODEL — ask this at every node:
+
+"If my left child gives me X and my right child gives me Y,
+what can I compute at the current node?"
+
+Answer this question and the recursive solution follows naturally.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THERE ARE 5 TYPES OF BINARY TREE PROBLEMS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPE 1 — DFS TRAVERSAL → preorder, inorder, postorder
+TYPE 2 — BFS LEVEL ORDER → process the tree level by level
+TYPE 3 — TREE PROPERTIES → depth, diameter, balance, symmetry
+TYPE 4 — PATH PROBLEMS → sums and paths between nodes
+TYPE 5 — BST → exploits the left < root < right property
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 1 — DFS TRAVERSAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Visit every node in a specific order
+→ Build a result while traversing (collect values, serialize, etc.)
+
+Three orderings — the only difference is WHEN you process the node:
+
+void dfs(TreeNode* root, vector<int>& result) {
+    if (!root) return;
+
+    result.push_back(root->val);   // PREORDER  — process before children
+    dfs(root->left, result);
+
+    // result.push_back(root->val); // INORDER   — process between children
+
+    dfs(root->right, result);
+
+    // result.push_back(root->val); // POSTORDER — process after children
+}
+When to use each:
+Preorder → copy/serialize the tree, build prefix expressions
+Inorder → get sorted order of a BST
+Postorder → delete tree, compute subtree values before parent needs them
+
+EXAMPLE — Binary Tree Inorder Traversal
+https://leetcode.com/problems/binary-tree-inorder-traversal
+
+Recursive: trivial with the template above.
+
+Iterative (common in interviews): use a stack.
+
+vector<int> inorderTraversal(TreeNode* root) {
+    vector<int> res;
+    stack<TreeNode*> st;
+    TreeNode* cur = root;
+    while (cur || !st.empty()) {
+        while (cur) { st.push(cur); cur = cur->left; }   // go left
+        cur = st.top(); st.pop();
+        res.push_back(cur->val);                          // process
+        cur = cur->right;                                 // go right
+    }
+    return res;
+}
+EXAMPLE — Invert Binary Tree
+https://leetcode.com/problems/invert-binary-tree
+
+Postorder: invert children first, then swap them at this node.
+
+TreeNode* invertTree(TreeNode* root) {
+    if (!root) return nullptr;
+    TreeNode* left  = invertTree(root->left);
+    TreeNode* right = invertTree(root->right);
+    root->left  = right;
+    root->right = left;
+    return root;
+}
+EXAMPLE — Serialize and Deserialize Binary Tree (Hard)
+https://leetcode.com/problems/serialize-and-deserialize-binary-tree
+
+Preorder serialization: encode each node value, use "null" for missing nodes.
+Deserialization: read values from the preorder sequence and reconstruct.
+
+string serialize(TreeNode* root) {
+    if (!root) return "null,";
+    return to_string(root->val) + "," +
+           serialize(root->left) + serialize(root->right);
+}
+TreeNode* deserialize(istringstream& ss) {
+    string val; getline(ss, val, ',');
+    if (val == "null") return nullptr;
+    TreeNode* node = new TreeNode(stoi(val));
+    node->left  = deserialize(ss);
+    node->right = deserialize(ss);
+    return node;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 — BFS / LEVEL ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Process nodes level by level
+→ Find minimum depth (BFS reaches leaves level by level)
+→ Right/left side view (first or last node at each level)
+→ Connect nodes at the same level
+
+TEMPLATE:
+
+vector<vector<int>> levelOrder(TreeNode* root) {
+    vector<vector<int>> res;
+    if (!root) return res;
+
+    queue<TreeNode*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        int size = q.size();          // number of nodes at this level
+        vector<int> level;
+
+        for (int i = 0; i < size; i++) {
+            TreeNode* node = q.front(); q.pop();
+            level.push_back(node->val);
+            if (node->left)  q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+        res.push_back(level);
+    }
+    return res;
+}
+The inner for loop (0 to size) is the key:
+it processes exactly one level before moving to the next.
+
+EXAMPLE — Binary Tree Level Order Traversal
+https://leetcode.com/problems/binary-tree-level-order-traversal
+
+Directly apply the template above.
+
+EXAMPLE — Binary Tree Right Side View
+https://leetcode.com/problems/binary-tree-right-side-view
+
+At each level, take only the last node (rightmost visible).
+
+vector<int> rightSideView(TreeNode* root) {
+    vector<int> res;
+    if (!root) return res;
+    queue<TreeNode*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int size = q.size();
+        for (int i = 0; i < size; i++) {
+            TreeNode* node = q.front(); q.pop();
+            if (i == size-1) res.push_back(node->val);   // last = rightmost
+            if (node->left)  q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+    }
+    return res;
+}
+EXAMPLE — Binary Tree Zigzag Level Order Traversal
+https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal
+
+Same BFS. On even levels, reverse the collected level before adding.
+
+if (level % 2 == 1) reverse(cur.begin(), cur.end());
+
+EXAMPLE — Minimum Depth of Binary Tree
+https://leetcode.com/problems/minimum-depth-of-binary-tree
+
+BFS naturally finds the shallowest leaf first.
+Return the level as soon as you hit a node with no children.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 3 — TREE PROPERTIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Compute a value that depends on the entire subtree structure
+→ Height, depth, diameter, balance, symmetry, count of nodes
+
+Key pattern: compute what you need from both children,
+then combine to answer at the current node.
+
+EXAMPLE — Maximum Depth of Binary Tree
+https://leetcode.com/problems/maximum-depth-of-binary-tree
+
+Depth at null = 0.
+Depth at node = 1 + max(left depth, right depth).
+
+int maxDepth(TreeNode* root) {
+    if (!root) return 0;
+    return 1 + max(maxDepth(root->left), maxDepth(root->right));
+}
+EXAMPLE — Balanced Binary Tree
+https://leetcode.com/problems/balanced-binary-tree
+
+A tree is balanced if every node's left and right heights differ by at most 1.
+Compute height and check balance simultaneously.
+Return -1 as a sentinel value meaning "already unbalanced".
+
+int height(TreeNode* root) {
+    if (!root) return 0;
+    int l = height(root->left);
+    int r = height(root->right);
+    if (l == -1 || r == -1) return -1;          // already unbalanced
+    if (abs(l - r) > 1)     return -1;          // unbalanced here
+    return 1 + max(l, r);
+}
+
+bool isBalanced(TreeNode* root) { return height(root) != -1; }
+EXAMPLE — Diameter of Binary Tree
+https://leetcode.com/problems/diameter-of-binary-tree
+
+Diameter at a node = height(left) + height(right).
+But the widest diameter might not pass through the root.
+Track global max while computing heights recursively.
+
+int ans = 0;
+
+int height(TreeNode* node) {
+    if (!node) return 0;
+    int l = height(node->left);
+    int r = height(node->right);
+    ans = max(ans, l + r);    // update diameter passing through this node
+    return 1 + max(l, r);
+}
+EXAMPLE — Symmetric Tree
+https://leetcode.com/problems/symmetric-tree
+
+A tree is symmetric if its left and right subtrees are mirrors.
+Two subtrees are mirrors if: their roots match AND
+left->left mirrors right->right AND left->right mirrors right->left.
+
+bool isMirror(TreeNode* l, TreeNode* r) {
+    if (!l && !r) return true;
+    if (!l || !r) return false;
+    return l->val == r->val &&
+           isMirror(l->left, r->right) &&
+           isMirror(l->right, r->left);
+}
+
+bool isSymmetric(TreeNode* root) {
+    return isMirror(root->left, root->right);
+}
+EXAMPLE — Count Good Nodes in Binary Tree
+https://leetcode.com/problems/count-good-nodes-in-binary-tree
+
+A node is good if no value greater than it exists on the path from root.
+Pass the max value seen so far on the way down.
+
+int goodNodes(TreeNode* root, int maxSoFar = INT_MIN) {
+    if (!root) return 0;
+    int good = (root->val >= maxSoFar) ? 1 : 0;
+    int newMax = max(maxSoFar, root->val);
+    return good + goodNodes(root->left, newMax) + goodNodes(root->right, newMax);
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 4 — PATH PROBLEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Find a path with a specific sum
+→ Find the path with maximum sum
+→ Count paths equal to a target
+
+Two sub-types:
+
+ROOT-TO-LEAF paths: pass remaining sum downward.
+When you reach a leaf, check if remaining == node->val.
+
+ANY-NODE paths: can start and end anywhere.
+Use postorder — compute from children, combine at current node.
+Use a global variable to track the best answer across all nodes.
+
+EXAMPLE — Path Sum
+https://leetcode.com/problems/path-sum
+
+Root-to-leaf. Subtract node value on the way down.
+At a leaf, check if remaining == 0.
+
+bool hasPathSum(TreeNode* root, int target) {
+    if (!root) return false;
+    if (!root->left && !root->right) return root->val == target;
+    return hasPathSum(root->left,  target - root->val) ||
+           hasPathSum(root->right, target - root->val);
+}
+EXAMPLE — Path Sum II (collect all paths)
+https://leetcode.com/problems/path-sum-ii
+
+Same idea, but collect the path. Add node, recurse, remove node.
+
+void dfs(TreeNode* node, int rem, vector<int>& path,
+         vector<vector<int>>& res) {
+    if (!node) return;
+    path.push_back(node->val);
+    if (!node->left && !node->right && rem == node->val)
+        res.push_back(path);
+    dfs(node->left,  rem - node->val, path, res);
+    dfs(node->right, rem - node->val, path, res);
+    path.pop_back();
+}
+EXAMPLE — Binary Tree Maximum Path Sum (Hard)
+https://leetcode.com/problems/binary-tree-maximum-path-sum
+
+A path can start and end at any node. It does not need to pass through root.
+At each node, the best path through it = node->val + best from left + best from right.
+But you can only return one side (left or right) to the parent — not both,
+because the parent needs a straight path, not a fork.
+
+int ans = INT_MIN;
+
+int maxGain(TreeNode* node) {
+    if (!node) return 0;
+    int l = max(0, maxGain(node->left));    // ignore negative gains
+    int r = max(0, maxGain(node->right));
+    ans = max(ans, node->val + l + r);      // path through this node
+    return node->val + max(l, r);           // return only one side to parent
+}
+EXAMPLE — Path Sum III
+https://leetcode.com/problems/path-sum-iii
+
+Count paths (starting/ending anywhere) that sum to target.
+Use prefix sum + hashmap (same idea as subarray sum equals k).
+Pass current prefix sum down. Check if (prefixSum - target) exists in map.
+
+int dfs(TreeNode* node, long long cur, long long target,
+        unordered_map<long long, int>& mp) {
+    if (!node) return 0;
+    cur += node->val;
+    int count = mp[cur - target];
+    mp[cur]++;
+    count += dfs(node->left, cur, target, mp);
+    count += dfs(node->right, cur, target, mp);
+    mp[cur]--;    // remove on the way back (path ends here)
+    return count;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 5 — BST (Binary Search Tree)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ The tree has the BST property: left < root < right
+→ Exploit this to search, insert, or validate in O(height)
+
+KEY PROPERTY: inorder traversal of a BST gives sorted order.
+
+EXAMPLE — Validate Binary Search Tree
+https://leetcode.com/problems/validate-binary-search-tree
+
+Do NOT just check left->val < root->val.
+All nodes in the left subtree must be < root.
+Pass valid range [min, max] down. Every node must fall within it.
+
+bool validate(TreeNode* node, long long lo, long long hi) {
+    if (!node) return true;
+    if (node->val <= lo || node->val >= hi) return false;
+    return validate(node->left,  lo, node->val) &&
+           validate(node->right, node->val, hi);
+}
+
+bool isValidBST(TreeNode* root) {
+    return validate(root, LLONG_MIN, LLONG_MAX);
+}
+EXAMPLE — Kth Smallest Element in a BST
+https://leetcode.com/problems/kth-smallest-element-in-a-bst
+
+Inorder traversal gives sorted order. Return the kth value.
+
+int kthSmallest(TreeNode* root, int k) {
+    int count = 0, ans = 0;
+    function<void(TreeNode*)> inorder = [&](TreeNode* node) {
+        if (!node) return;
+        inorder(node->left);
+        if (++count == k) ans = node->val;
+        inorder(node->right);
+    };
+    inorder(root);
+    return ans;
+}
+EXAMPLE — Lowest Common Ancestor of a BST
+https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree
+
+Use the BST property to navigate without checking both subtrees.
+If both p and q are smaller than root → LCA is in left subtree.
+If both are larger → LCA is in right subtree.
+Otherwise root is the LCA (they split here).
+
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (p->val < root->val && q->val < root->val)
+        return lowestCommonAncestor(root->left, p, q);
+    if (p->val > root->val && q->val > root->val)
+        return lowestCommonAncestor(root->right, p, q);
+    return root;
+}
+EXAMPLE — Lowest Common Ancestor of a Binary Tree (not BST)
+https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree
+
+Cannot use BST property. Use postorder instead.
+If current node is p or q → return it.
+If both children return non-null → current node is the LCA.
+Otherwise return whichever child returned non-null.
+
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (!root || root == p || root == q) return root;
+    TreeNode* left  = lowestCommonAncestor(root->left,  p, q);
+    TreeNode* right = lowestCommonAncestor(root->right, p, q);
+    if (left && right) return root;   // p and q are in different subtrees
+    return left ? left : right;       // both in same subtree
+}
+EXAMPLE — Construct Binary Search Tree from Preorder Traversal
+https://leetcode.com/problems/construct-binary-search-tree-from-preorder-traversal
+
+Use valid range [min, max] like validation. First value in preorder is root.
+All values in (min, root->val) go left. Values in (root->val, max) go right.
+
+int idx = 0;
+
+TreeNode* build(vector<int>& pre, int lo, int hi) {
+    if (idx == pre.size() || pre[idx] < lo || pre[idx] > hi)
+        return nullptr;
+    TreeNode* node = new TreeNode(pre[idx++]);
+    node->left  = build(pre, lo, node->val);
+    node->right = build(pre, node->val, hi);
+    return node;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH TYPE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Is it a BST and are you using left < root < right to navigate?
+→ YES → Type 5 (BST)
+
+Does it ask for level-by-level processing, minimum depth,
+or right/left side view?
+→ YES → Type 2 (BFS Level Order)
+
+Does it involve a path (root-to-leaf or any-node-to-any-node)?
+→ YES → Type 4 (Path Problems)
+Does the path start at root? → pass remaining sum down.
+Can it start anywhere? → postorder + global max.
+
+Does it ask for a tree-wide property (depth, diameter, balance)?
+→ YES → Type 3 (Tree Properties)
+Ask: "what do I need from each child to compute this at the node?"
+
+Otherwise (visit nodes in a specific order, collect values)?
+→ YES → Type 1 (DFS Traversal)
+Need sorted order from BST → inorder.
+Build/serialize tree → preorder.
+Compute subtree values → postorder.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Validating BST only at adjacent nodes
+Checking left->val < root->val is NOT enough.
+All nodes in the left subtree must be less than root.
+Always use the [min, max] range approach.
+
+MISTAKE 2 — Forgetting the global variable pattern for diameter/max path
+The answer does not always pass through the root.
+Any time the maximum is across the whole tree (not just the root),
+use a global variable and update it inside the recursion.
+
+MISTAKE 3 — Not handling null nodes
+Every tree function needs if (!root) return .
+What base value? Think about what null means:
+null height = 0, null sum = 0, null node = nullptr.
+
+MISTAKE 4 — Returning both sides of a path to the parent
+In maximum path sum, a path through a node uses both left and right.
+But when returning to the parent, you can only extend in one direction.
+Return node->val + max(left, right), not node->val + left + right.
+
+MISTAKE 5 — Using BFS when DFS is needed (or vice versa)
+BFS → level-by-level, minimum depth, right side view.
+DFS → property of the whole tree, path sums, BST operations.
+Mixing them leads to correct-looking but wrong code.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type 1 — DFS Traversal
+Binary Tree Inorder Traversal
+https://leetcode.com/problems/binary-tree-inorder-traversal
+
+Invert Binary Tree
+https://leetcode.com/problems/invert-binary-tree
+
+Serialize and Deserialize Binary Tree (Hard)
+https://leetcode.com/problems/serialize-and-deserialize-binary-tree
+
+Type 2 — BFS Level Order
+Binary Tree Level Order Traversal
+https://leetcode.com/problems/binary-tree-level-order-traversal
+
+Binary Tree Right Side View
+https://leetcode.com/problems/binary-tree-right-side-view
+
+Binary Tree Zigzag Level Order Traversal
+https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal
+
+Type 3 — Tree Properties
+Maximum Depth of Binary Tree
+https://leetcode.com/problems/maximum-depth-of-binary-tree
+
+Balanced Binary Tree
+https://leetcode.com/problems/balanced-binary-tree
+
+Diameter of Binary Tree
+https://leetcode.com/problems/diameter-of-binary-tree
+
+Symmetric Tree
+https://leetcode.com/problems/symmetric-tree
+
+Count Good Nodes in Binary Tree
+https://leetcode.com/problems/count-good-nodes-in-binary-tree
+
+Type 4 — Path Problems
+Path Sum
+https://leetcode.com/problems/path-sum
+
+Path Sum II
+https://leetcode.com/problems/path-sum-ii
+
+Path Sum III
+https://leetcode.com/problems/path-sum-iii
+
+Binary Tree Maximum Path Sum (Hard)
+https://leetcode.com/problems/binary-tree-maximum-path-sum
+
+Type 5 — BST
+Validate Binary Search Tree
+https://leetcode.com/problems/validate-binary-search-tree
+
+Kth Smallest Element in a BST
+https://leetcode.com/problems/kth-smallest-element-in-a-bst
+
+Lowest Common Ancestor of a BST
+https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree
+
+Lowest Common Ancestor of a Binary Tree
+https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree
+
+Construct BST from Preorder Traversal
+https://leetcode.com/problems/construct-binary-search-tree-from-preorder-traversal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE BINARY TREE CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visit in order → DFS (pre/in/post based on when you process)
+Sorted values from BST → inorder traversal
+Build / serialize → preorder traversal
+Compute subtree values first → postorder traversal
+Level by level / minimum depth → BFS with queue
+Height, balance, diameter → postorder + combine left and right
+Answer not always at root → global variable updated inside recursion
+Root-to-leaf path sum → pass remaining target downward
+Any-node path sum → postorder, return max gain to parent
+BST validation → pass [min, max] range down
+LCA in BST → navigate left/right by value comparison
+LCA in binary tree → postorder, return non-null child
