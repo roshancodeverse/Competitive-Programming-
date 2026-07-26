@@ -1,0 +1,541 @@
+Most people stop at BFS and DFS for graphs.
+That handles maybe half the problems.
+The rest require Union-Find, Topological Sort, or Dijkstra —
+and knowing which one to reach for.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 0 — BUILD THE GRAPH FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Most problems give edges as a list. Convert to adjacency list first.
+
+// Unweighted graph (undirected)
+vector<vector<int>> adj(n);
+for (auto& e : edges) {
+    adj[e[0]].push_back(e[1]);
+    adj[e[1]].push_back(e[0]);   // remove for directed
+}
+// Weighted graph
+vector<vector<pair<int,int>>> adj(n);   // {neighbor, weight}
+for (auto& e : edges) {
+    adj[e[0]].push_back({e[1], e[2]});
+    adj[e[1]].push_back({e[0], e[2]});
+}
+Grid problems: neighbors are up/down/left/right.
+
+int dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
+for (auto& d : dirs) {
+    int nr = r + d[0], nc = c + d[1];
+    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols)
+        // valid neighbor
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THERE ARE 5 TYPES OF GRAPH PROBLEMS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPE 1 — BFS / DFS → traversal, connectivity, islands
+TYPE 2 — SHORTEST PATH → min cost, min steps between nodes
+TYPE 3 — TOPO SORT → ordering with dependencies (DAG)
+TYPE 4 — UNION-FIND → dynamic connectivity, cycle in undirected
+TYPE 5 — BIPARTITE → 2-group conflict, cycle in directed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 1 — BFS / DFS (Traversal + Connectivity)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Count connected components
+→ Check if path exists
+→ Flood fill / island problems
+→ Any "explore all reachable nodes" task
+
+Keywords: "connected", "reachable", "island", "region", "path exists"
+
+DFS TEMPLATE (graph):
+
+vector<bool> visited(n, false);
+
+void dfs(int node, vector<vector<int>>& adj) {
+    visited[node] = true;
+    for (int nb : adj[node])
+        if (!visited[nb])
+            dfs(nb, adj);
+}
+
+int count = 0;
+for (int i = 0; i < n; i++)
+    if (!visited[i]) { dfs(i, adj); count++; }
+BFS TEMPLATE (graph):
+
+vector<bool> visited(n, false);
+queue<int> q;
+q.push(start);
+visited[start] = true;
+
+while (!q.empty()) {
+    int node = q.front(); q.pop();
+    for (int nb : adj[node])
+        if (!visited[nb]) { visited[nb] = true; q.push(nb); }
+}
+DFS TEMPLATE (grid):
+
+void dfs(vector<vector<char>>& grid, int r, int c) {
+    if (r < 0 || r >= grid.size() || c < 0 || c >= grid[0].size())
+        return;
+    if (grid[r][c] != '1') return;
+    grid[r][c] = '0';   // mark visited by modifying the grid
+    dfs(grid, r+1, c); dfs(grid, r-1, c);
+    dfs(grid, r, c+1); dfs(grid, r, c-1);
+}
+EXAMPLE — Number of Islands
+https://leetcode.com/problems/number-of-islands
+
+For each unvisited '1', run DFS and sink all connected land.
+Each DFS call = one island.
+
+int numIslands(vector<vector<char>>& grid) {
+    int ans = 0;
+    for (int r = 0; r < grid.size(); r++)
+        for (int c = 0; c < grid[0].size(); c++)
+            if (grid[r][c] == '1') { dfs(grid, r, c); ans++; }
+    return ans;
+}
+EXAMPLE — Clone Graph
+https://leetcode.com/problems/clone-graph
+
+DFS with a hashmap {original → clone}.
+Before recursing, create the clone and store it.
+If already in map, return the clone directly (handles cycles).
+
+unordered_map<Node*, Node*> cloned;
+
+Node* dfs(Node* node) {
+    if (cloned.count(node)) return cloned[node];
+    Node* copy = new Node(node->val);
+    cloned[node] = copy;
+    for (Node* nb : node->neighbors)
+        copy->neighbors.push_back(dfs(nb));
+    return copy;
+}
+EXAMPLE — Pacific Atlantic Water Flow
+https://leetcode.com/problems/pacific-atlantic-water-flow
+
+Instead of simulating water forward, reverse it.
+BFS/DFS from Pacific border, mark all reachable cells.
+BFS/DFS from Atlantic border, mark all reachable cells.
+Answer = cells reachable from both.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 — SHORTEST PATH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Find minimum steps/cost between two nodes
+
+Rule:
+All edges equal weight (or unweighted) → BFS
+Edges have different weights → Dijkstra
+
+Keywords: "minimum cost", "shortest path", "minimum steps",
+"minimum distance", "time to reach"
+
+─────────────────────────────────────────────────────
+SUB-TYPE A — BFS (Unweighted / Equal weights)
+─────────────────────────────────────────────────────
+
+BFS visits nodes in order of distance from the source.
+First time you reach a node = shortest path to it.
+
+vector<int> dist(n, -1);
+queue<int> q;
+q.push(start);
+dist[start] = 0;
+
+while (!q.empty()) {
+    int node = q.front(); q.pop();
+    for (int nb : adj[node]) {
+        if (dist[nb] == -1) {
+            dist[nb] = dist[node] + 1;
+            q.push(nb);
+        }
+    }
+}
+EXAMPLE — 01 Matrix
+https://leetcode.com/problems/01-matrix
+
+Multi-source BFS: push ALL 0-cells into the queue at level 0.
+Spread outward. First time a 1-cell is reached = its distance.
+
+EXAMPLE — Rotting Oranges
+https://leetcode.com/problems/rotting-oranges
+
+Multi-source BFS from all rotten oranges simultaneously.
+Answer = BFS levels elapsed when last fresh orange rots.
+Count fresh oranges. If any remain after BFS → return -1.
+
+EXAMPLE — Word Ladder
+https://leetcode.com/problems/word-ladder
+
+BFS where each edge = words differing by exactly one letter.
+For each word, try replacing every character with a-z.
+Answer = level at which target word is reached.
+
+─────────────────────────────────────────────────────
+SUB-TYPE B — DIJKSTRA (Weighted, non-negative edges)
+─────────────────────────────────────────────────────
+
+Like BFS but uses a min-heap (priority queue) instead of a queue.
+Always expand the node with the smallest known distance first.
+
+vector<int> dist(n, INT_MAX);
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
+// min-heap on {distance, node}
+
+dist[src] = 0;
+pq.push({0, src});
+
+while (!pq.empty()) {
+    auto [d, u] = pq.top(); pq.pop();
+    if (d > dist[u]) continue;   // stale entry — skip
+
+    for (auto [v, w] : adj[u]) {
+        if (dist[u] + w < dist[v]) {
+            dist[v] = dist[u] + w;
+            pq.push({dist[v], v});
+        }
+    }
+}
+EXAMPLE — Network Delay Time
+https://leetcode.com/problems/network-delay-time
+
+Single-source Dijkstra from node k.
+Answer = max(dist). If any node is unreachable → return -1.
+
+EXAMPLE — Path With Minimum Effort
+https://leetcode.com/problems/path-with-minimum-effort
+
+Dijkstra on a grid. Edge weight = |height difference|.
+dist[r][c] = minimum "effort" (max edge on path) to reach (r,c).
+Relax: effort = max(current effort, |grid[nr][nc] - grid[r][c]|).
+
+EXAMPLE — Cheapest Flights Within K Stops
+https://leetcode.com/problems/cheapest-flights-within-k-stops
+
+Dijkstra with state = {cost, node, stops_used}.
+Only relax edges if stops_used < k.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 3 — TOPOLOGICAL SORT (DAG + Dependencies)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Directed graph with dependencies
+→ Find a valid ordering of tasks
+→ Detect cycle in a directed graph
+
+Keywords: "prerequisites", "course schedule", "task dependencies",
+"build order", "finish all tasks"
+
+Key idea: process nodes with 0 incoming edges (in-degree 0) first.
+After processing, reduce the in-degree of their neighbors.
+If a neighbor's in-degree becomes 0 → add it to the queue.
+
+KAHN'S ALGORITHM (BFS-based topo sort):
+
+vector<int> indegree(n, 0);
+for (int u = 0; u < n; u++)
+    for (int v : adj[u])
+        indegree[v]++;
+
+queue<int> q;
+for (int i = 0; i < n; i++)
+    if (indegree[i] == 0) q.push(i);
+
+vector<int> order;
+while (!q.empty()) {
+    int u = q.front(); q.pop();
+    order.push_back(u);
+    for (int v : adj[u])
+        if (--indegree[v] == 0)
+            q.push(v);
+}
+
+// order.size() == n → valid DAG (no cycle)
+// order.size() <  n → cycle exists
+EXAMPLE — Course Schedule
+https://leetcode.com/problems/course-schedule
+
+prerequisites[i] = [a, b] means b must come before a → edge b → a.
+Run Kahn's. If order.size() == numCourses → all courses can finish.
+
+EXAMPLE — Course Schedule II
+https://leetcode.com/problems/course-schedule-ii
+
+Same setup. Return the order vector (valid course sequence).
+If cycle detected → return empty vector.
+
+EXAMPLE — Parallel Courses III (Hard)
+https://leetcode.com/problems/parallel-courses-iii
+
+Topological sort + DP on the DAG.
+time[v] = max(time[u] for all u → v) + time[v].
+Answer = max time across all nodes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 4 — UNION-FIND (Dynamic Connectivity)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Dynamically merge groups / connect nodes
+→ Detect cycle in an undirected graph
+→ "Are these two nodes in the same component?"
+
+Keywords: "connected components", "same group", "merge accounts",
+"redundant edge", "union", "detect cycle"
+
+THE DATA STRUCTURE:
+
+vector<int> parent, rnk;
+
+void init(int n) {
+    parent.resize(n);
+    rnk.resize(n, 0);
+    iota(parent.begin(), parent.end(), 0);   // parent[i] = i
+}
+
+int find(int x) {
+    if (parent[x] != x)
+        parent[x] = find(parent[x]);   // path compression
+    return parent[x];
+}
+
+bool unite(int x, int y) {
+    int px = find(x), py = find(y);
+    if (px == py) return false;          // already in same component
+    if (rnk[px] < rnk[py]) swap(px, py);
+    parent[py] = px;
+    if (rnk[px] == rnk[py]) rnk[px]++;
+    return true;
+}
+EXAMPLE — Redundant Connection
+https://leetcode.com/problems/redundant-connection
+
+Process edges one by one. Try unite(u, v).
+First edge where find(u) == find(v) before union → redundant.
+
+for (auto& e : edges)
+    if (!unite(e[0]-1, e[1]-1))
+        return e;
+EXAMPLE — Number of Connected Components
+https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph
+
+Init count = n. Each successful unite() → count--.
+Return count at the end.
+
+EXAMPLE — Accounts Merge
+https://leetcode.com/problems/accounts-merge
+
+Map every email to an index. Unite all emails within the same account.
+If the same email appears in two accounts → unite those accounts.
+Group emails by root. Sort each group. Format output.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 5 — BIPARTITE CHECK + CYCLE DETECTION IN DIRECTED GRAPHS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ "Can nodes be split into 2 groups with no conflict within a group?"
+→ Detect cycle in a directed graph (when Kahn's is not convenient)
+→ Find which nodes are safe (cannot reach a cycle)
+
+BIPARTITE CHECK (2-coloring with BFS):
+
+A graph is bipartite if you can color every node with 2 colors
+such that no two adjacent nodes share the same color.
+Equivalent: no odd-length cycle exists.
+
+vector<int> color(n, -1);
+
+bool check(int start, vector<vector<int>>& adj) {
+    queue<int> q;
+    q.push(start);
+    color[start] = 0;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u]) {
+            if (color[v] == -1) {
+                color[v] = 1 - color[u];
+                q.push(v);
+            } else if (color[v] == color[u]) {
+                return false;   // same color on both ends = not bipartite
+            }
+        }
+    }
+    return true;
+}
+EXAMPLE — Is Graph Bipartite?
+https://leetcode.com/problems/is-graph-bipartite
+
+Run bipartite check on every unvisited node (graph may be disconnected).
+If any component fails → return false.
+
+CYCLE DETECTION IN DIRECTED GRAPH (DFS with 3 states):
+
+For directed graphs, a 2-state visited array is not enough.
+A "back edge" (visiting a node currently on the stack) = cycle.
+You need 3 states:
+0 = unvisited
+1 = currently on DFS stack (being explored)
+2 = fully done (no cycle found through this node)
+
+vector<int> state(n, 0);
+
+bool hasCycle(int u, vector<vector<int>>& adj) {
+    state[u] = 1;
+    for (int v : adj[u]) {
+        if (state[v] == 1) return true;    // back edge = cycle
+        if (state[v] == 0 && hasCycle(v, adj)) return true;
+    }
+    state[u] = 2;
+    return false;
+}
+WHY 3 STATES?
+With only 2 states, a cross edge (u → v where v is already fully done)
+would be incorrectly flagged as a cycle. State 2 means "done, safe".
+
+EXAMPLE — Find Eventual Safe States
+https://leetcode.com/problems/find-eventual-safe-states
+
+A safe node = no cycle is reachable from it.
+After DFS, all nodes with state == 2 are safe.
+Return them sorted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH TYPE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Does the problem involve prerequisites / task ordering?
+→ YES → Type 3 (Topological Sort)
+
+Does it ask for minimum cost or minimum steps?
+→ Equal edge weights (or unweighted) → Type 2A (BFS)
+→ Different edge weights → Type 2B (Dijkstra)
+
+Does it involve dynamically merging groups, or cycle in undirected?
+→ YES → Type 4 (Union-Find)
+
+Does it ask to split nodes into 2 conflicting groups?
+Or detect a cycle in a directed graph?
+→ YES → Type 5 (Bipartite / DFS 3-state)
+
+None of the above (connectivity, island count, reachability)?
+→ Type 1 (BFS / DFS)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Marking visited when popping instead of pushing
+If you mark when popping, the same node gets added multiple times.
+Always mark visited BEFORE pushing into the queue.
+
+MISTAKE 2 — Using BFS for weighted shortest path
+BFS only gives the shortest path when all edges have equal weight.
+If weights differ → use Dijkstra.
+
+MISTAKE 3 — Using 2-state visited for directed cycle detection
+For undirected graphs, 2 states (visited/not) are enough.
+For directed graphs, you need 3 states.
+2 states will incorrectly flag cross-edges as cycles.
+
+MISTAKE 4 — Not handling disconnected graphs
+Always loop over ALL nodes, not just node 0.
+Many graph problems have multiple disconnected components.
+
+MISTAKE 5 — Not skipping stale entries in Dijkstra
+When you pop {dist, node} from the heap:
+if dist > known dist[node] → skip it immediately.
+Without this, you reprocess nodes you already found optimal paths for.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type 1 — BFS / DFS
+Number of Islands
+https://leetcode.com/problems/number-of-islands
+
+Flood Fill
+https://leetcode.com/problems/flood-fill
+
+Clone Graph
+https://leetcode.com/problems/clone-graph
+
+Pacific Atlantic Water Flow
+https://leetcode.com/problems/pacific-atlantic-water-flow
+
+Type 2A — Shortest Path (BFS)
+01 Matrix
+https://leetcode.com/problems/01-matrix
+
+Rotting Oranges
+https://leetcode.com/problems/rotting-oranges
+
+Word Ladder
+https://leetcode.com/problems/word-ladder
+
+Type 2B — Shortest Path (Dijkstra)
+Network Delay Time
+https://leetcode.com/problems/network-delay-time
+
+Path With Minimum Effort
+https://leetcode.com/problems/path-with-minimum-effort
+
+Cheapest Flights Within K Stops
+https://leetcode.com/problems/cheapest-flights-within-k-stops
+
+Type 3 — Topological Sort
+Course Schedule
+https://leetcode.com/problems/course-schedule
+
+Course Schedule II
+https://leetcode.com/problems/course-schedule-ii
+
+Parallel Courses III (Hard)
+https://leetcode.com/problems/parallel-courses-iii
+
+Type 4 — Union-Find
+Redundant Connection
+https://leetcode.com/problems/redundant-connection
+
+Number of Connected Components
+https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph
+
+Accounts Merge
+https://leetcode.com/problems/accounts-merge
+
+Type 5 — Bipartite / Cycle Detection
+Is Graph Bipartite?
+https://leetcode.com/problems/is-graph-bipartite
+
+Find Eventual Safe States
+https://leetcode.com/problems/find-eventual-safe-states
+
+Course Schedule (directed cycle version)
+https://leetcode.com/problems/course-schedule
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE GRAPH CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Connectivity / Islands → DFS or BFS
+Shortest path, equal weights → BFS (level = distance)
+Shortest path, different weights → Dijkstra (min-heap)
+Ordering with dependencies → Topological Sort (Kahn's)
+Dynamic grouping / merge → Union-Find
+2-group conflict check → Bipartite (2-coloring BFS)
+Cycle in directed graph → DFS with 3 states
