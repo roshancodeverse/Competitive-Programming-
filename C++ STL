@@ -1,0 +1,469 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USEFUL CONSTANTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INT_MAX    →  2147483647   (~2.1 × 10⁹)
+INT_MIN    → -2147483648
+LLONG_MAX  →  9223372036854775807   (use when int overflows)
+LLONG_MIN  → -9223372036854775808
+1e9        →  1000000000   (as double — cast to int if needed)
+
+// Safe infinity for DP / Dijkstra
+const int INF = 1e9;
+const long long LINF = 1e18;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VECTOR (dynamic array — use everywhere)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vector<int> v;                     // empty
+vector<int> v(n, 0);              // size n, all zeros
+vector<int> v = {1, 2, 3};
+vector<vector<int>> grid(m, vector<int>(n, 0));  // 2D grid
+
+v.push_back(x);                   // add to end     O(1) amortized
+v.pop_back();                      // remove end      O(1)
+v[i]                               // access          O(1)
+v.front()  /  v.back()            // first / last
+v.size()                           // number of elements (unsigned!)
+v.empty()
+v.clear()
+v.resize(n)                        // resize (fills with 0)
+v.resize(n, val)                   // resize (fills with val)
+v.reserve(n)                       // pre-allocate memory (no size change)
+v.erase(v.begin() + i)            // remove at index i   O(n)
+v.insert(v.begin() + i, x)        // insert at index i   O(n)
+
+// Iteration
+for (int x : v) { }
+for (int i = 0; i < v.size(); i++) { }
+for (auto it = v.begin(); it != v.end(); it++) { }
+
+// 2D vector iteration
+for (auto& row : grid)
+    for (int x : row) { }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STRING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+string s = "hello";
+s.size() / s.length()
+s.empty()
+s[i]                               // character access
+s.front()  /  s.back()
+s.push_back('a')                   // append char
+s.pop_back()                       // remove last char
+s += "world"                       // concatenate string
+s += 'a'                           // append char
+
+s.substr(i, len)                   // substring starting at i, length len
+s.find("abc")                      // returns index or string::npos
+s.find('a', start)                 // search from start
+s.replace(i, len, "new")          // replace len chars at i
+s.erase(i, len)                    // remove len chars at i
+s.insert(i, "abc")                 // insert at position i
+
+// String ↔ number
+to_string(42)                      // int → string
+stoi("42")                         // string → int
+stol("42")                         // string → long
+stoll("42")                        // string → long long
+stod("3.14")                       // string → double
+
+// Char utilities
+isalpha(c)   isdigit(c)   isalnum(c)   isspace(c)
+tolower(c)   toupper(c)
+c - '0'                            // char digit → int
+c - 'a'                            // char letter → 0-based index
+
+// Sort a string
+sort(s.begin(), s.end());
+
+// Reverse a string
+reverse(s.begin(), s.end());
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAIR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+pair<int,int> p = {3, 5};
+p.first   p.second
+
+make_pair(3, 5)                    // same as {3, 5}
+
+// Structured binding (C++17) — cleaner than .first / .second
+auto [a, b] = p;
+
+// Pairs sort by first, then second by default
+vector<pair<int,int>> v;
+sort(v.begin(), v.end());          // sorts by first, then second
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STACK (LIFO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+stack<int> st;
+
+st.push(x)                         // push to top     O(1)
+st.pop()                           // remove top      O(1)  — does NOT return value
+st.top()                           // peek top        O(1)
+st.empty()
+st.size()
+
+// Common pattern
+while (!st.empty()) {
+    int x = st.top(); st.pop();
+    // process x
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUEUE (FIFO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+queue<int> q;
+
+q.push(x)                          // enqueue         O(1)
+q.pop()                            // dequeue         O(1)  — does NOT return value
+q.front()                          // peek front      O(1)
+q.back()                           // peek back       O(1)
+q.empty()
+q.size()
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DEQUE (double-ended queue)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+deque<int> dq;
+
+dq.push_back(x)   dq.pop_back()    // back operations   O(1)
+dq.push_front(x)  dq.pop_front()   // front operations  O(1)
+dq.front()        dq.back()
+dq[i]                              // random access      O(1)
+dq.empty()        dq.size()
+
+// Use deque for: sliding window maximum (monotonic deque)
+// push_back new elements, pop_front elements out of window
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRIORITY QUEUE (heap)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+priority_queue<int> maxH;                                    // max-heap (default)
+priority_queue<int, vector<int>, greater<int>> minH;         // min-heap
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> minHP;  // min-heap of pairs
+
+maxH.push(x)                       // insert          O(log n)
+maxH.pop()                         // remove top      O(log n)
+maxH.top()                         // peek            O(1)
+maxH.empty()
+maxH.size()
+
+// Custom comparator
+auto cmp = [](int a, int b) { return a > b; };   // min-heap behavior
+priority_queue<int, vector<int>, decltype(cmp)> pq(cmp);
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SET (sorted, unique elements)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+set<int> s;
+
+s.insert(x)                        // insert          O(log n)
+s.erase(x)                         // remove by value O(log n)
+s.erase(s.find(x))                // remove by iterator
+s.count(x)                         // 0 or 1 (exists check)
+s.find(x)                          // iterator (s.end() if not found)
+s.contains(x)                      // C++20 — true/false
+s.size()    s.empty()
+
+// Ordered access
+*s.begin()                         // smallest element
+*s.rbegin()                        // largest element
+s.lower_bound(x)                   // first element >= x
+s.upper_bound(x)                   // first element > x
+
+// Multiset — allows duplicates
+multiset<int> ms;
+ms.erase(ms.find(x))              // removes ONLY ONE occurrence (not all!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UNORDERED_SET (hash set, O(1) average)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+unordered_set<int> us;
+
+us.insert(x)                       // O(1) average
+us.erase(x)                        // O(1) average
+us.count(x)                        // 0 or 1
+us.find(x)                         // iterator
+us.size()    us.empty()
+
+// Use when: you only need exists/not-exists, and don't need ordering
+// Use set when: you need sorted order or lower/upper bound
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MAP (sorted key-value pairs)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+map<string, int> m;
+
+m[key] = val                       // insert or update  O(log n)
+m.at(key)                          // access (throws if not found)
+m.count(key)                       // 0 or 1
+m.find(key)                        // iterator
+m.erase(key)                       // O(log n)
+m.size()    m.empty()
+
+// Iteration (always in sorted key order)
+for (auto& [key, val] : m) { }
+
+// Ordered access
+m.begin()->first                   // smallest key
+m.rbegin()->first                  // largest key
+m.lower_bound(key)                 // first key >= key
+m.upper_bound(key)                 // first key > key
+
+// Default value: m[key] auto-initializes to 0 for int
+// This is useful for frequency counting:
+for (int x : nums) m[x]++;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UNORDERED_MAP (hash map, O(1) average)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+unordered_map<int, int> um;
+
+um[key] = val                      // O(1) average
+um.count(key)                      // 0 or 1
+um.find(key)                       // iterator
+um.erase(key)                      // O(1) average
+um.size()    um.empty()
+
+for (auto& [key, val] : um) { }   // no guaranteed order
+
+// Use when: you need fast lookup and don't care about order
+// Use map when: you need sorted order or range queries
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SORTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+sort(v.begin(), v.end());                          // ascending   O(n log n)
+sort(v.begin(), v.end(), greater<int>());          // descending
+
+// Custom comparator
+sort(v.begin(), v.end(), [](int a, int b) {
+    return a > b;   // descending
+});
+
+// Sort pairs by second element
+sort(v.begin(), v.end(), [](auto& a, auto& b) {
+    return a.second < b.second;
+});
+
+// Sort 2D vector by second column
+sort(grid.begin(), grid.end(), [](auto& a, auto& b) {
+    return a[1] < b[1];
+});
+
+// Partial sort — only sort first k elements
+partial_sort(v.begin(), v.begin() + k, v.end());
+
+// nth_element — put k-th smallest in position k  O(n) average
+nth_element(v.begin(), v.begin() + k, v.end());
+// v[k] is now the k-th smallest (0-indexed)
+
+// stable_sort — preserves relative order of equal elements
+stable_sort(v.begin(), v.end());
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BINARY SEARCH ON SORTED VECTOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// v must be sorted
+binary_search(v.begin(), v.end(), x)   // true if x exists
+
+lower_bound(v.begin(), v.end(), x)     // iterator to first element >= x
+upper_bound(v.begin(), v.end(), x)     // iterator to first element > x
+
+// Convert iterator to index
+int idx = lower_bound(v.begin(), v.end(), x) - v.begin();
+
+// Count occurrences of x in sorted vector
+int cnt = upper_bound(v.begin(), v.end(), x)
+        - lower_bound(v.begin(), v.end(), x);
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USEFUL ALGORITHMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Min / Max
+min(a, b)    max(a, b)
+min({a, b, c})               // initializer list — 3+ values
+min_element(v.begin(), v.end())   // returns iterator
+max_element(v.begin(), v.end())   // returns iterator
+*min_element(v.begin(), v.end())  // dereference for value
+
+// Reverse
+reverse(v.begin(), v.end());
+reverse(s.begin(), s.end());      // works on strings too
+
+// Fill
+fill(v.begin(), v.end(), 0);      // set all elements to 0
+fill(arr, arr + n, -1);           // works on arrays
+
+// Sum
+accumulate(v.begin(), v.end(), 0);           // sum (start = 0)
+accumulate(v.begin(), v.end(), 0LL);         // long long sum
+accumulate(v.begin(), v.end(), 1, multiplies<int>());  // product
+
+// Count
+count(v.begin(), v.end(), x)      // count occurrences of x
+
+// Find
+find(v.begin(), v.end(), x)       // returns iterator (v.end() if not found)
+
+// Remove duplicates (from SORTED vector)
+v.erase(unique(v.begin(), v.end()), v.end());
+
+// Rotate
+rotate(v.begin(), v.begin() + k, v.end());   // rotate left by k
+
+// Next permutation
+sort(v.begin(), v.end());          // start from smallest
+do {
+    // process permutation
+} while (next_permutation(v.begin(), v.end()));
+
+// Copy
+copy(src.begin(), src.end(), dst.begin());
+
+// Abs
+abs(x)                            // for int
+fabs(x)                           // for double
+llabs(x)                          // for long long (or just abs() in C++11+)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MATH UTILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Power and square root
+pow(base, exp)                     // returns double
+sqrt(x)                            // returns double
+ceil(x)    floor(x)   round(x)
+
+// Integer ceiling division (avoid float entirely)
+(a + b - 1) / b                    // ceil(a / b) for positive integers
+
+// GCD / LCM (C++17)
+__gcd(a, b)                        // GCD (older)
+gcd(a, b)                          // C++17 (include <numeric>)
+lcm(a, b)                          // C++17
+
+// Log
+log(x)                             // natural log
+log2(x)                            // log base 2
+log10(x)                           // log base 10
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BIT MANIPULATION SHORTCUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+__builtin_popcount(x)              // count set bits (1s) in int
+__builtin_popcountll(x)            // count set bits in long long
+__builtin_clz(x)                   // count leading zeros
+__builtin_ctz(x)                   // count trailing zeros
+
+x & 1                              // check if odd (last bit)
+x >> 1                             // divide by 2
+x << 1                             // multiply by 2
+x & (x - 1)                        // clear lowest set bit
+x & (-x)                           // isolate lowest set bit (used in BIT/Fenwick)
+(x >> i) & 1                       // check if i-th bit is set
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAMBDA FUNCTIONS (for custom comparators)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Sort descending
+sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
+
+// Sort by absolute value
+sort(v.begin(), v.end(), [](int a, int b) { return abs(a) < abs(b); });
+
+// Capture a variable from outer scope
+int target = 5;
+auto found = find_if(v.begin(), v.end(), [target](int x) {
+    return x == target;
+});
+
+// Lambda with multiple statements
+sort(v.begin(), v.end(), [](auto& a, auto& b) {
+    if (a[0] != b[0]) return a[0] < b[0];
+    return a[1] < b[1];
+});
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON PATTERNS — QUICK REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Frequency map
+unordered_map<int,int> freq;
+for (int x : nums) freq[x]++;
+
+// 2D visited array
+vector<vector<bool>> visited(m, vector<bool>(n, false));
+
+// 4-directional grid traversal
+int dirs[4][2] = {{0,1},{0,-1},{1,0},{-1,0}};
+for (auto& d : dirs) {
+    int nr = r + d[0], nc = c + d[1];
+    if (nr >= 0 && nr < m && nc >= 0 && nc < n) { }
+}
+
+// Prefix sum
+vector<int> prefix(n + 1, 0);
+for (int i = 0; i < n; i++) prefix[i+1] = prefix[i] + nums[i];
+// sum of [l, r] = prefix[r+1] - prefix[l]
+
+// Sliding window skeleton
+int l = 0, res = 0;
+for (int r = 0; r < n; r++) {
+    // expand window with nums[r]
+    while (/* window invalid */) { l++; }
+    res = max(res, r - l + 1);
+}
+
+// Convert int to string and back
+string s = to_string(n);
+int n    = stoi(s);
+
+// Split string by delimiter (manual)
+vector<string> tokens;
+stringstream ss(str);
+string token;
+while (getline(ss, token, ',')) tokens.push_back(token);
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHICH CONTAINER TO USE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Need fast random access? → vector
+Need fast front + back insert/delete? → deque
+Need LIFO (last in, first out)? → stack
+Need FIFO (first in, first out)? → queue
+Need smallest/largest quickly? → priority_queue
+Need sorted unique elements? → set
+Need sorted key-value pairs? → map
+Need fast exists check (unordered)? → unordered_set
+Need fast key-value lookup (unordered)? → unordered_map
+Need duplicates + sorted? → multiset
+Need range queries on sorted data? → set or map (lower/upper bound)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TIME COMPLEXITIES — QUICK REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vector push_back/pop_back O(1)
+access [] O(1)
+insert/erase middle O(n)
+
+stack / queue all ops O(1)
+
+deque all ops O(1)
+
+priority_queue push/pop O(log n)
+top O(1)
+
+set / map insert/erase O(log n)
+find O(log n)
+lower_bound O(log n)
+
+unordered_set / unordered_map
+insert/erase O(1) average, O(n) worst
+find O(1) average
+
+sort O(n log n)
+
+binary_search / lower_bound O(log n) [sorted input only]
