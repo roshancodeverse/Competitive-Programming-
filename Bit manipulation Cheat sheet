@@ -1,0 +1,325 @@
+Bit manipulation has maybe 15 tricks total.
+
+Most people know 3 of them and get stuck on everything else.
+
+This post has all 15 — with explanations, C++ code, and
+real LeetCode problems for each one.
+
+Read it once. Bookmark it. Never get stuck on a bit problem again.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE BASICS — OPERATORS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+&   AND      — 1 only when BOTH bits are 1
+|   OR       — 1 when EITHER bit is 1
+^   XOR      — 1 when bits are DIFFERENT
+~   NOT      — flips all bits  (~5 = -6 in two's complement)
+<<  left shift   — multiply by 2 per shift
+>>  right shift  — divide by 2 per shift (arithmetic for signed)
+
+5  =  0101
+6  =  0110
+
+5 & 6  =  0100  =  4
+5 | 6  =  0111  =  7
+5 ^ 6  =  0011  =  3
+~5     =  ...11111010  =  -6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BIT READ / WRITE — THE FOUR CORE OPERATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Check if i-th bit is set  (0-indexed from right)
+bool isSet = (x >> i) & 1;
+
+// Set the i-th bit  (force it to 1)
+x = x | (1 << i);
+
+// Clear the i-th bit  (force it to 0)
+x = x & ~(1 << i);
+
+// Toggle the i-th bit  (flip it)
+x = x ^ (1 << i);
+Example with x = 0b1010 (10), i = 1:
+  Check:   (10 >> 1) & 1  =  5 & 1  =  1    ✓ bit 1 is set
+  Clear:   10 & ~(1<<1)   =  10 & ~2 =  8    result: 0b1000
+  Toggle:  10 ^ (1<<1)    =  10 ^ 2  =  8    result: 0b1000
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+POWER OF 2 TRICKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Check if x is a power of 2
+bool isPow2 = (x > 0) && (x & (x - 1)) == 0;
+
+Why it works:
+  Powers of 2 in binary have exactly one 1 bit.
+  16  =  10000
+  15  =  01111
+  16 & 15  =  00000  →  0, so it IS a power of 2.
+
+  Non-power: 12 = 1100, 11 = 1011, 12 & 11 = 1000 ≠ 0.
+
+// Next power of 2 greater than or equal to x
+int nextPow2(int x) {
+    if (x <= 0) return 1;
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x + 1;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LOWEST SET BIT TRICKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Isolate the lowest set bit
+int lowest = x & (-x);
+
+Why it works:
+  -x in two's complement flips all bits then adds 1.
+  12  =  ...001100
+ -12  =  ...110100
+ 12 & -12  =  000100  →  isolates the rightmost 1.
+
+// Clear the lowest set bit
+x = x & (x - 1);
+
+Why it works:
+  x - 1 flips the lowest set bit and all bits below it.
+  12  =  1100
+  11  =  1011
+  12 & 11  =  1000  →  lowest set bit is gone.
+
+// Used in: counting set bits manually, Fenwick Tree (BIT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COUNTING SET BITS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Built-in (always prefer this)
+__builtin_popcount(x)     // int
+__builtin_popcountll(x)   // long long
+
+// Manual (uses the clear-lowest-bit trick)
+int countBits(int x) {
+    int count = 0;
+    while (x) {
+        x &= (x - 1);   // clears one set bit per iteration
+        count++;
+    }
+    return count;
+}
+
+// Brian Kernighan's algorithm — same idea, cleaner loop
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+XOR TRICKS — THE MOST USEFUL ONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The three XOR laws you need to know:
+  x ^ x  =  0    (anything XORed with itself is 0)
+  x ^ 0  =  x    (anything XORed with 0 is itself)
+  XOR is commutative and associative
+
+// Swap two variables without a temp
+a ^= b;
+b ^= a;
+a ^= b;
+// Works but use std::swap in practice — this is just good to know.
+
+// Find the single number in an array where every other appears twice
+int single = 0;
+for (int x : nums) single ^= x;
+// All pairs cancel out (x^x=0), the lone number remains.
+// LeetCode 136 — Single Number
+
+// Find two non-repeating numbers when everything else appears twice
+int xorAll = 0;
+for (int x : nums) xorAll ^= x;
+// xorAll = a ^ b. Find any set bit in xorAll (they differ there).
+int bit = xorAll & (-xorAll);   // lowest set bit
+int a = 0, b = 0;
+for (int x : nums) {
+    if (x & bit) a ^= x;
+    else          b ^= x;
+}
+// LeetCode 260 — Single Number III
+
+// Check if two numbers have opposite signs
+bool oppositeSigns = (x ^ y) < 0;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHIFT TRICKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+x << 1   ==  x * 2
+x << k   ==  x * 2^k
+x >> 1   ==  x / 2   (for non-negative x)
+x >> k   ==  x / 2^k
+
+// 1 << k  gives the k-th power of 2
+1 << 0  =  1
+1 << 1  =  2
+1 << 2  =  4
+1 << 10 =  1024
+
+// IMPORTANT: use 1LL << k when k >= 31 to avoid int overflow
+long long mask = 1LL << 35;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BITMASK — REPRESENTING SUBSETS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+An integer can represent which elements from a set of n items
+are "selected". Bit i is 1 if item i is included.
+
+n items → 2^n possible subsets → masks from 0 to (1<<n) - 1
+
+// Iterate over all subsets of n items
+for (int mask = 0; mask < (1 << n); mask++) {
+    for (int i = 0; i < n; i++) {
+        if (mask & (1 << i)) {
+            // item i is in this subset
+        }
+    }
+}
+
+// Check if item i is in mask
+bool inSubset = mask & (1 << i);
+
+// Add item i to mask
+mask |= (1 << i);
+
+// Remove item i from mask
+mask &= ~(1 << i);
+
+// Count items in mask (size of subset)
+int size = __builtin_popcount(mask);
+
+// Iterate over all subsets of a given mask (advanced)
+for (int sub = mask; sub > 0; sub = (sub - 1) & mask) {
+    // process sub
+}
+// This is O(3^n) total across all masks — used in bitmask DP.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUILT-IN FUNCTIONS — USE THESE, DO NOT REWRITE THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+__builtin_popcount(x)      // count of 1 bits (int)
+__builtin_popcountll(x)    // count of 1 bits (long long)
+
+__builtin_clz(x)           // count leading zeros (int, x must be > 0)
+__builtin_clzll(x)         // count leading zeros (long long)
+// floor(log2(x)) = 31 - __builtin_clz(x)   for int
+
+__builtin_ctz(x)           // count trailing zeros (x must be > 0)
+__builtin_ctzll(x)         // count trailing zeros (long long)
+// position of lowest set bit = __builtin_ctz(x)
+
+__builtin_parity(x)        // 1 if odd number of set bits, 0 if even
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON PATTERNS IN LEETCODE PROBLEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pattern 1 — XOR to find missing or duplicate
+When every element appears an even number of times except one,
+XOR of the whole array gives that element.
+XOR with 1 to n gives the missing number.
+  // Missing number in [0, n]
+  int missing = n;
+  for (int i = 0; i < n; i++) missing ^= i ^ nums[i];
+  // LeetCode 268
+Pattern 2 — Bitmask as visited state in DP
+When n ≤ 20 and you need to track which items are "used",
+an integer bitmask is your visited array.
+  // Bitmask DP skeleton
+  vector<int> dp(1 << n, INT_MAX);
+  dp[0] = 0;
+  for (int mask = 0; mask < (1 << n); mask++) {
+      if (dp[mask] == INT_MAX) continue;
+      for (int i = 0; i < n; i++) {
+          if (mask & (1 << i)) continue;   // already used
+          int newMask = mask | (1 << i);
+          dp[newMask] = min(dp[newMask], dp[mask] + cost[i]);
+      }
+  }
+Pattern 3 — AND of a range
+AND of all numbers from l to r.
+Trick: find the common prefix of l and r in binary.
+  // LeetCode 201
+  int shift = 0;
+  while (l != r) { l >>= 1; r >>= 1; shift++; }
+  return l << shift;
+Pattern 4 — Counting bits for all numbers 0 to n
+Use the fact that countBits(i) = countBits(i >> 1) + (i & 1).
+  // LeetCode 338
+  vector<int> dp(n + 1, 0);
+  for (int i = 1; i <= n; i++)
+      dp[i] = dp[i >> 1] + (i & 1);
+Pattern 5 — Reverse bits
+Reverse all 32 bits of an integer.
+  // LeetCode 190
+  uint32_t reverseBits(uint32_t n) {
+      uint32_t res = 0;
+      for (int i = 0; i < 32; i++) {
+          res = (res << 1) | (n & 1);
+          n >>= 1;
+      }
+      return res;
+  }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK REFERENCE — PRINT THIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Check i-th bit (x >> i) & 1
+
+Set i-th bit x | (1 << i)
+
+Clear i-th bit x & ~(1 << i)
+
+Toggle i-th bit x ^ (1 << i)
+
+Is power of 2? x > 0 && (x & (x-1)) == 0
+
+Isolate lowest set bit x & (-x)
+
+Clear lowest set bit x & (x-1)
+
+Count set bits __builtin_popcount(x)
+
+XOR to find lone item xorAll ^ each element
+
+Swap without temp a^=b; b^=a; a^=b;
+
+Left shift = × 2^k x << k
+
+Right shift = ÷ 2^k x >> k
+
+Use 1LL << k for k ≥ 31
+
+All subsets of n items mask from 0 to (1<<n)-1
+
+Sub-subsets of mask for(sub=mask; sub>0; sub=(sub-1)&mask)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — EASY TO HARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Easy
+LC 136 Single Number (XOR)
+LC 191 Number of 1 Bits (popcount)
+LC 190 Reverse Bits (bit by bit)
+LC 231 Power of Two (x & x-1)
+LC 268 Missing Number (XOR with indices)
+LC 338 Counting Bits (DP + shift)
+
+Medium
+LC 137 Single Number II (bit counting per position)
+LC 201 Bitwise AND of Numbers Range (common prefix)
+LC 260 Single Number III (XOR + partition)
+LC 318 Maximum Product of Word Lengths (bitmask for letters)
+LC 371 Sum of Two Integers (XOR + carry)
+LC 461 Hamming Distance (XOR + popcount)
+
+Hard
+LC 401 Binary Watch (popcount + backtracking)
+LC 421 Maximum XOR of Two Numbers (Trie on bits)
+LC 847 Shortest Path Visiting All Nodes (bitmask DP on graph)
