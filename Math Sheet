@@ -1,0 +1,364 @@
+Math problems on LeetCode have a reputation for being either
+trivially easy or completely unapproachable.
+
+The unapproachable ones usually come down to one of these:
+you do not know modular inverse, you forgot how fast power works,
+or you never learned the Sieve of Eratosthenes.
+
+None of these are hard. They just require knowing the formula.
+
+This post is that formula sheet.
+Everything in one place, with C++ code ready to use.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULAR ARITHMETIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When a problem says "return the answer modulo 10⁹ + 7",
+the true answer is astronomically large. You compute it modulo
+a prime to keep it manageable.
+
+  const int MOD = 1e9 + 7;   // 1000000007 — almost always this value
+
+The four rules:
+
+  (a + b) % m  =  ((a % m) + (b % m)) % m        // addition
+  (a - b) % m  =  ((a % m) - (b % m) + m) % m    // subtraction — add m to prevent negative
+  (a * b) % m  =  ((a % m) * (b % m)) % m        // multiplication
+  (a / b) % m  =  (a * modInverse(b, m)) % m     // division — covered below
+
+  // CRITICAL: subtraction without +m gives wrong negative result
+  long long diff = ((a % MOD) - (b % MOD) + MOD) % MOD;
+
+  // Apply mod at EVERY step, not just the end
+  long long ans = 1;
+  for (int i = 0; i < n; i++) {
+      ans = (ans * arr[i]) % MOD;   // correct
+  }
+  // NOT: ans *= arr[i]; at the end ans % MOD; — overflows before you get there
+
+  // Multiplication needs long long even when inputs are < MOD
+  // because (10^9) * (10^9) overflows int and even long long barely fits
+  long long product = (1LL * a * b) % MOD;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FAST POWER (Binary Exponentiation)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Compute a^b % mod in O(log b) instead of O(b).
+
+  long long fastPow(long long base, long long exp, long long mod) {
+      long long result = 1;
+      base %= mod;
+      while (exp > 0) {
+          if (exp & 1) result = result * base % mod;   // if current bit is set
+          base = base * base % mod;                     // square the base
+          exp >>= 1;                                    // move to next bit
+      }
+      return result;
+  }
+
+  fastPow(2, 10, MOD)   →  1024
+  fastPow(2, 1e9, MOD)  →  computed in ~30 iterations
+
+  // C++17 has this built-in for integers:
+  // std::pow is for doubles — do NOT use for modular exponentiation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODULAR INVERSE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Division does not work directly under modulo.
+To compute (a / b) % mod, you need the modular inverse of b.
+
+The modular inverse of b is a number x such that:
+  b * x ≡ 1  (mod m)
+
+  // When mod is PRIME — use Fermat's Little Theorem
+  // b^(mod-1) ≡ 1 (mod p)  →  b^(mod-2) ≡ b⁻¹ (mod p)
+
+  long long modInverse(long long b, long long mod) {
+      return fastPow(b, mod - 2, mod);   // mod must be prime
+  }
+
+  // Division under mod
+  long long divide(long long a, long long b, long long mod) {
+      return a % mod * modInverse(b, mod) % mod;
+  }
+
+  // When mod is NOT prime — use Extended Euclidean Algorithm
+  long long extGCD(long long a, long long b, long long &x, long long &y) {
+      if (b == 0) { x = 1; y = 0; return a; }
+      long long x1, y1;
+      long long g = extGCD(b, a % b, x1, y1);
+      x = y1;
+      y = x1 - (a / b) * y1;
+      return g;
+  }
+
+  long long modInverseExt(long long b, long long mod) {
+      long long x, y;
+      long long g = extGCD(b, mod, x, y);
+      // inverse exists only if gcd(b, mod) == 1
+      return (x % mod + mod) % mod;
+  }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GCD AND LCM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // Euclidean algorithm — O(log min(a, b))
+  int gcd(int a, int b) {
+      return b == 0 ? a : gcd(b, a % b);
+  }
+
+  // LCM — divide first to avoid overflow
+  long long lcm(long long a, long long b) {
+      return a / gcd(a, b) * b;
+  }
+
+  // C++17 built-ins  (include <numeric>)
+  #include <numeric>
+  gcd(a, b)    // works on int and long long
+  lcm(a, b)    // works on int and long long
+
+  // GCD of an entire array
+  int result = nums[0];
+  for (int x : nums) result = gcd(result, x);
+
+  // Key property: gcd(a, b) = gcd(b, a % b) = gcd(a - b, b)
+  // LCM × GCD = a × b   →   lcm = a / gcd * b
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRIME CHECKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // Check if a single number is prime — O(sqrt(n))
+  bool isPrime(int n) {
+      if (n < 2) return false;
+      if (n == 2) return true;
+      if (n % 2 == 0) return false;
+      for (int i = 3; i * i <= n; i += 2) {
+          if (n % i == 0) return false;
+      }
+      return true;
+  }
+
+  Why sqrt(n)?
+    If n has a factor > sqrt(n), its paired factor is < sqrt(n).
+    So checking up to sqrt(n) is sufficient.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SIEVE OF ERATOSTHENES (All primes up to n)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  When you need all primes up to n, sieve is O(n log log n) —
+  much faster than checking each number individually.
+
+  vector<bool> sieve(int n) {
+      vector<bool> isPrime(n + 1, true);
+      isPrime[0] = isPrime[1] = false;
+      for (int i = 2; i * i <= n; i++) {
+          if (isPrime[i]) {
+              for (int j = i * i; j <= n; j += i) {
+                  isPrime[j] = false;
+              }
+          }
+      }
+      return isPrime;
+  }
+
+  // Usage
+  auto prime = sieve(1000000);
+  if (prime[17]) { }   // true — 17 is prime
+
+  // Collect all primes into a vector
+  vector<int> primes;
+  for (int i = 2; i <= n; i++)
+      if (prime[i]) primes.push_back(i);
+
+  // Why start inner loop at i*i?
+  // All smaller multiples of i were already marked by smaller primes.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRIME FACTORIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // Get all prime factors of n — O(sqrt(n))
+  vector<int> primeFactors(int n) {
+      vector<int> factors;
+      for (int i = 2; i * i <= n; i++) {
+          while (n % i == 0) {
+              factors.push_back(i);
+              n /= i;
+          }
+      }
+      if (n > 1) factors.push_back(n);   // remaining prime factor
+      return factors;
+  }
+
+  primeFactors(12)  →  [2, 2, 3]
+  primeFactors(17)  →  [17]
+
+  // Count of divisors of n
+  // From prime factorization n = p1^a1 * p2^a2 * ...
+  // Number of divisors = (a1+1) * (a2+1) * ...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMBINATIONS — nCr
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  nCr = n! / (r! * (n-r)!)
+
+  // Small n — Pascal's Triangle  O(n²) precomputation
+  vector<vector<long long>> C(n + 1, vector<long long>(n + 1, 0));
+  C[0][0] = 1;
+  for (int i = 1; i <= n; i++) {
+      C[i][0] = 1;
+      for (int j = 1; j <= i; j++)
+          C[i][j] = C[i-1][j-1] + C[i-1][j];
+  }
+  // C[n][r] gives nCr
+
+  // Large n with modulo — precompute factorials and inverse factorials
+  const int MAXN = 1e6 + 5;
+  long long fact[MAXN], inv_fact[MAXN];
+
+  void precompute(int n, long long mod) {
+      fact[0] = 1;
+      for (int i = 1; i <= n; i++)
+          fact[i] = fact[i-1] * i % mod;
+      inv_fact[n] = fastPow(fact[n], mod - 2, mod);
+      for (int i = n - 1; i >= 0; i--)
+          inv_fact[i] = inv_fact[i+1] * (i+1) % mod;
+  }
+
+  long long nCr(int n, int r, long long mod) {
+      if (r < 0 || r > n) return 0;
+      return fact[n] % mod * inv_fact[r] % mod * inv_fact[n-r] % mod;
+  }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USEFUL FORMULAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // Sum of 1 to n
+  n * (n + 1) / 2
+
+  // Sum of squares 1² + 2² + ... + n²
+  n * (n + 1) * (2*n + 1) / 6
+
+  // Sum of cubes 1³ + 2³ + ... + n³
+  (n * (n + 1) / 2)²
+
+  // Arithmetic series: a, a+d, a+2d, ..., a+(n-1)d
+  sum = n * (2*a + (n-1)*d) / 2
+
+  // Integer ceiling division  (no float, no casting)
+  int ceil_div = (a + b - 1) / b;   // ceil(a / b) for positive a, b
+
+  // Digits in a number
+  int numDigits = (int)log10(n) + 1;   // for n > 0
+  // Or simply: count while n > 0 { n /= 10; count++; }
+
+  // Sum of digits
+  int digitSum(int n) {
+      int s = 0;
+      while (n > 0) { s += n % 10; n /= 10; }
+      return s;
+  }
+
+  // Reverse a number
+  int reverseNum(int n) {
+      int rev = 0;
+      while (n > 0) { rev = rev * 10 + n % 10; n /= 10; }
+      return rev;
+  }
+
+  // Check if n is a perfect square
+  int sq = (int)sqrt((double)n);
+  bool isPerfectSquare = sq * sq == n || (sq+1)*(sq+1) == n;
+  // Check sq+1 too due to floating point error in sqrt
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OVERFLOW — WHEN TO USE LONG LONG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  int max    ≈  2.1 × 10⁹
+  long long  ≈  9.2 × 10¹⁸
+
+  Use long long when:
+    - Values can reach 10⁹ and you multiply two of them
+    - Summing n values each up to 10⁹  (sum can reach 10¹⁴)
+    - Computing factorials beyond 12!  (12! ≈ 4.8 × 10⁸, 13! overflows int)
+    - Any intermediate product in modular arithmetic
+
+  // Multiplication — cast BEFORE multiplying, not after
+  long long product = (long long)a * b;    // correct
+  long long product = (long long)(a * b);  // WRONG — already overflowed
+
+  // Factorial overflow reference
+  12!  =  479001600      fits in int
+  13!  =  6227020800     overflows int, fits in long long
+  20!  =  2.4 × 10¹⁸    fits in long long (barely)
+  21!  overflows long long — use modular arithmetic
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUICK REFERENCE — PRINT THIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MOD 1e9 + 7 (use long long for products)
+
+Addition mod (a + b) % m
+
+Subtraction mod (a - b + m) % m
+
+Multiplication mod (1LL * a * b) % m
+
+Division mod (a * modInverse(b, m)) % m
+
+Fast power fastPow(base, exp, mod) — O(log exp)
+
+Modular inverse fastPow(b, mod-2, mod) — only when mod is prime
+
+GCD gcd(a, b) or __gcd(a, b)
+
+LCM a / gcd(a, b) * b
+
+Single prime check trial division up to sqrt(n) — O(sqrt(n))
+
+All primes to n Sieve of Eratosthenes — O(n log log n)
+
+Prime factors of n trial division up to sqrt(n) — O(sqrt(n))
+
+nCr small n Pascal's triangle
+
+nCr large n + mod precompute fact[] and inv_fact[] using fast power
+
+Sum 1..n n*(n+1)/2
+
+Ceil division (a + b - 1) / b
+
+Perfect square sq = sqrt(n); sqsq==n || (sq+1)(sq+1)==n
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Modular Arithmetic
+LC 1497 Check If Array Pairs Are Divisible by k
+LC 2575 Find the Divisibility Array of a String
+
+Fast Power
+LC 50 Pow(x, n)
+LC 372 Super Pow
+
+GCD / LCM
+LC 1979 Find Greatest Common Divisor of Array
+LC 2413 Smallest Even Multiple
+LC 365 Water and Jug Problem
+
+Primes / Sieve
+LC 204 Count Primes (Sieve)
+LC 952 Largest Component Size by CF (prime factors + union find)
+
+Combinations / Factorials
+LC 62 Unique Paths (nCr)
+LC 1979 Pascal's Triangle (small nCr)
+LC 1569 Number of Ways to Reorder Array (nCr with mod)
+
+General Math
+LC 69 Sqrt(x) (perfect square / binary search)
+LC 263 Ugly Number (prime factors)
+LC 264 Ugly Number II (DP + primes)
+LC 1837 Sum of Digits in Base K
