@@ -1,0 +1,513 @@
+Most people use a heap only for "find the k-th largest".
+There are actually 5 distinct heap patterns on LeetCode —
+and each one has a different template.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 0 — THE HEAP IN C++ (READ THIS FIRST)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Max-heap (default) — top() gives the LARGEST element
+priority_queue<int> maxH;
+
+// Min-heap — top() gives the SMALLEST element
+priority_queue<int, vector<int>, greater<int>> minH;
+
+// Min-heap of pairs {value, index}
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> minH;
+
+// Common operations — all O(log n) except top() which is O(1)
+minH.push(x);       // insert
+minH.pop();         // remove top
+minH.top();         // peek (does NOT remove)
+minH.size();
+minH.empty();
+KEY RULE:
+Max-heap → top() = largest → use to MAINTAIN THE MINIMUM (kick out the max)
+Min-heap → top() = smallest → use to MAINTAIN THE MAXIMUM (kick out the min)
+
+This sounds backwards. It becomes natural once you see the patterns.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THERE ARE 5 TYPES OF HEAP PROBLEMS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPE 1 — TOP K ELEMENTS → keep a heap of size k
+TYPE 2 — MERGE K SORTED → merge with a min-heap
+TYPE 3 — TWO HEAPS → balance a max-heap and a min-heap
+TYPE 4 — SCHEDULING / GREEDY → always process the best next task
+TYPE 5 — LAZY DELETION → heap + hashmap to skip stale entries
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 1 — TOP K ELEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Find the k largest / k smallest / k most frequent elements
+→ Find the k-th largest / k-th smallest element
+
+Keywords: "k largest", "k smallest", "k most frequent", "k-th largest"
+
+KEY INSIGHT:
+To find the k LARGEST → maintain a MIN-heap of size k.
+The top of the heap is always the smallest of the k largest.
+If a new element is bigger than the top → pop the top, push the new one.
+At the end, the heap contains the k largest elements.
+
+To find the k SMALLEST → maintain a MAX-heap of size k.
+Same idea reversed.
+
+TEMPLATE — K Largest (min-heap of size k):
+
+priority_queue<int, vector<int>, greater<int>> minH;  // min-heap
+
+for (int x : nums) {
+    minH.push(x);
+    if (minH.size() > k)
+        minH.pop();   // remove the smallest so only k largest remain
+}
+
+// minH.top() = k-th largest
+// minH contains the k largest elements
+TEMPLATE — K Smallest (max-heap of size k):
+
+priority_queue<int> maxH;  // max-heap
+
+for (int x : nums) {
+    maxH.push(x);
+    if (maxH.size() > k)
+        maxH.pop();   // remove the largest so only k smallest remain
+}
+
+// maxH.top() = k-th smallest
+// maxH contains the k smallest elements
+EXAMPLE — Kth Largest Element in an Array
+https://leetcode.com/problems/kth-largest-element-in-an-array
+
+Maintain a min-heap of size k.
+After processing all elements, top() = k-th largest.
+
+int findKthLargest(vector<int>& nums, int k) {
+    priority_queue<int, vector<int>, greater<int>> minH;
+    for (int x : nums) {
+        minH.push(x);
+        if (minH.size() > k) minH.pop();
+    }
+    return minH.top();
+}
+EXAMPLE — K Closest Points to Origin
+https://leetcode.com/problems/k-closest-points-to-origin
+
+Distance = x² + y² (no need for sqrt).
+Maintain a MAX-heap of size k on distance.
+Kick out the farthest point whenever size exceeds k.
+
+vector<vector<int>> kClosest(vector<vector<int>>& points, int k) {
+    // {distance, index} — max-heap
+    priority_queue<pair<int,int>> maxH;
+    for (int i = 0; i < points.size(); i++) {
+        int d = points[i][0]*points[i][0] + points[i][1]*points[i][1];
+        maxH.push({d, i});
+        if (maxH.size() > k) maxH.pop();
+    }
+    vector<vector<int>> res;
+    while (!maxH.empty()) {
+        res.push_back(points[maxH.top().second]);
+        maxH.pop();
+    }
+    return res;
+}
+EXAMPLE — Top K Frequent Elements
+https://leetcode.com/problems/top-k-frequent-elements
+
+Count frequencies with a hashmap.
+Run the "k largest" pattern on frequencies.
+
+vector<int> topKFrequent(vector<int>& nums, int k) {
+    unordered_map<int,int> freq;
+    for (int x : nums) freq[x]++;
+
+    // min-heap on {frequency, value}
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> minH;
+    for (auto& [val, cnt] : freq) {
+        minH.push({cnt, val});
+        if (minH.size() > k) minH.pop();
+    }
+    vector<int> res;
+    while (!minH.empty()) { res.push_back(minH.top().second); minH.pop(); }
+    return res;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 — MERGE K SORTED LISTS / ARRAYS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Merge k sorted arrays or linked lists
+→ Find the smallest element across k sorted sequences
+→ "Find the k-th smallest in a sorted matrix"
+
+Keywords: "merge k sorted", "k sorted lists", "sorted matrix"
+
+KEY INSIGHT:
+You have k sorted sources. You want to extract elements in order.
+Put the current smallest element of EACH source into a min-heap.
+Always pop the minimum, then push the next element from that same source.
+
+TEMPLATE — Merge K Sorted Arrays:
+
+// {value, array_index, element_index}
+priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, greater<>> minH;
+
+// Seed with the first element of each array
+for (int i = 0; i < arrays.size(); i++)
+    if (!arrays[i].empty())
+        minH.push({arrays[i][0], i, 0});
+
+vector<int> result;
+while (!minH.empty()) {
+    auto [val, i, j] = minH.top(); minH.pop();
+    result.push_back(val);
+    if (j + 1 < arrays[i].size())
+        minH.push({arrays[i][j+1], i, j+1});
+}
+EXAMPLE — Merge K Sorted Lists
+https://leetcode.com/problems/merge-k-sorted-lists
+
+Same template but for linked lists.
+Push head of each list. After popping a node, push node->next.
+
+ListNode* mergeKLists(vector<ListNode*>& lists) {
+    auto cmp = [](ListNode* a, ListNode* b) { return a->val > b->val; };
+    priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> minH(cmp);
+
+    for (ListNode* l : lists)
+        if (l) minH.push(l);
+
+    ListNode dummy(0);
+    ListNode* cur = &dummy;
+    while (!minH.empty()) {
+        cur->next = minH.top(); minH.pop();
+        cur = cur->next;
+        if (cur->next) minH.push(cur->next);
+    }
+    return dummy.next;
+}
+EXAMPLE — Kth Smallest Element in a Sorted Matrix
+https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix
+
+Treat each row as a sorted list. Merge k rows and return k-th element.
+
+int kthSmallest(vector<vector<int>>& matrix, int k) {
+    int n = matrix.size();
+    // {value, row, col}
+    priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, greater<>> minH;
+    for (int i = 0; i < n; i++)
+        minH.push({matrix[i][0], i, 0});
+
+    int ans = 0;
+    while (k--) {
+        auto [val, r, c] = minH.top(); minH.pop();
+        ans = val;
+        if (c + 1 < n) minH.push({matrix[r][c+1], r, c+1});
+    }
+    return ans;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 3 — TWO HEAPS (Median / Balance Problems)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Find or maintain the median of a stream
+→ Problems that need to track both the "upper half" and "lower half"
+→ Any problem needing the middle element dynamically
+
+Keywords: "median", "balance", "stream of numbers"
+
+KEY INSIGHT:
+Split numbers into two halves:
+Left half → Max-heap (top = largest of the smaller half)
+Right half → Min-heap (top = smallest of the larger half)
+
+Median:
+Even count → average of maxH.top() and minH.top()
+Odd count → top of the larger heap
+
+After every insert, rebalance so |maxH.size() - minH.size()| <= 1.
+
+TEMPLATE — Add Number + Get Median:
+
+priority_queue<int> maxH;                            // left half
+priority_queue<int, vector<int>, greater<int>> minH; // right half
+
+void addNum(int num) {
+    // Always push to maxH first
+    maxH.push(num);
+
+    // Ensure all of maxH <= all of minH
+    if (!minH.empty() && maxH.top() > minH.top()) {
+        minH.push(maxH.top()); maxH.pop();
+    }
+
+    // Balance sizes: maxH can have at most 1 extra
+    if (maxH.size() > minH.size() + 1) {
+        minH.push(maxH.top()); maxH.pop();
+    } else if (minH.size() > maxH.size()) {
+        maxH.push(minH.top()); minH.pop();
+    }
+}
+
+double findMedian() {
+    if (maxH.size() > minH.size()) return maxH.top();
+    return (maxH.top() + minH.top()) / 2.0;
+}
+EXAMPLE — Find Median from Data Stream
+https://leetcode.com/problems/find-median-from-data-stream
+
+Direct application of the template above.
+
+EXAMPLE — Sliding Window Median
+https://leetcode.com/problems/sliding-window-median
+
+Two heaps + lazy deletion (see Type 5).
+As the window slides, mark the element going out as "to be deleted".
+Rebalance after each deletion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 4 — SCHEDULING / GREEDY WITH A HEAP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Assign tasks to workers to minimize time
+→ Problems where you always want to process the "most urgent" or "least loaded" next
+→ Job scheduling, meeting rooms, CPU task simulation
+
+Keywords: "minimum time", "assign tasks", "k workers", "cooldown", "idle"
+
+KEY INSIGHT:
+Always pick the best available option greedily.
+A heap gives you the best option in O(log n).
+
+EXAMPLE — Task Scheduler
+https://leetcode.com/problems/task-scheduler
+
+You must wait n intervals between two of the same task.
+Strategy: always execute the most frequent available task first.
+
+int leastInterval(vector<char>& tasks, int n) {
+    unordered_map<char,int> freq;
+    for (char c : tasks) freq[c]++;
+
+    priority_queue<int> maxH;  // max-heap on frequencies
+    for (auto& [c, f] : freq) maxH.push(f);
+
+    // Min-heap of {available_time, frequency} for cooling-down tasks
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> cooldown;
+
+    int time = 0;
+    while (!maxH.empty() || !cooldown.empty()) {
+        time++;
+        if (!maxH.empty()) {
+            int f = maxH.top() - 1; maxH.pop();
+            if (f > 0) cooldown.push({time + n, f});
+        }
+        if (!cooldown.empty() && cooldown.top().first == time) {
+            maxH.push(cooldown.top().second); cooldown.pop();
+        }
+    }
+    return time;
+}
+EXAMPLE — Find Minimum Time to Finish All Jobs (Hard)
+https://leetcode.com/problems/find-minimum-time-to-finish-all-jobs
+
+k workers. Assign jobs to minimize the maximum total time of any worker.
+Use backtracking + pruning, NOT a heap (this is a common trap).
+
+EXAMPLE — Process Tasks Using Servers
+https://leetcode.com/problems/process-tasks-using-servers
+
+Two heaps:
+free servers → min-heap sorted by (weight, index)
+busy servers → min-heap sorted by (free_at_time, weight, index)
+
+For each task, if no free server, advance time to when the next one frees up.
+
+vector<int> assignTasks(vector<int>& servers, vector<int>& tasks) {
+    // {weight, index}
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> freeH;
+    // {free_at, weight, index}
+    priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, greater<>> busyH;
+
+    for (int i = 0; i < servers.size(); i++)
+        freeH.push({servers[i], i});
+
+    vector<int> ans(tasks.size());
+    for (int i = 0; i < tasks.size(); i++) {
+        int t = i;
+        // Free up servers that are done
+        while (!busyH.empty() && get<0>(busyH.top()) <= t) {
+            auto [at, w, idx] = busyH.top(); busyH.pop();
+            freeH.push({w, idx});
+        }
+        // If no free server, jump time
+        if (freeH.empty()) {
+            t = get<0>(busyH.top());
+            while (!busyH.empty() && get<0>(busyH.top()) <= t) {
+                auto [at, w, idx] = busyH.top(); busyH.pop();
+                freeH.push({w, idx});
+            }
+        }
+        auto [w, idx] = freeH.top(); freeH.pop();
+        ans[i] = idx;
+        busyH.push({t + tasks[i], w, idx});
+    }
+    return ans;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 5 — LAZY DELETION (Heap + Hashmap)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Elements need to be "removed" from the heap but heap doesn't support deletion
+→ Sliding window with a heap
+→ Elements get invalidated over time
+
+KEY INSIGHT:
+You cannot efficiently remove an arbitrary element from a heap.
+Instead, mark it as "deleted" in a hashmap.
+When you pop from the heap, skip any element that was marked deleted.
+
+TEMPLATE — Lazy Deletion:
+
+priority_queue<int> maxH;  // or min-heap
+unordered_map<int, int> deleted;  // value → how many times it's been deleted
+
+void remove(int val) {
+    deleted[val]++;
+}
+
+int top() {
+    // Skip deleted entries
+    while (!maxH.empty() && deleted[maxH.top()] > 0) {
+        deleted[maxH.top()]--;
+        maxH.pop();
+    }
+    return maxH.top();
+}
+EXAMPLE — Sliding Window Maximum
+https://leetcode.com/problems/sliding-window-maximum
+
+(Usually solved with a monotonic deque, but can be done with lazy heap.)
+When the leftmost element of the window goes out, mark it as deleted.
+
+EXAMPLE — Maximum Average Pass Ratio (with removal)
+Any problem where elements leave a "pool" and you need the max/min of what remains.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH TYPE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Does it ask for the k largest / k smallest / k-th element?
+→ YES → Type 1 (Top K — heap of size k)
+
+Does it involve merging multiple sorted sequences?
+→ YES → Type 2 (Merge K Sorted — min-heap across sources)
+
+Does it ask for a median or require tracking both halves?
+→ YES → Type 3 (Two Heaps)
+
+Does it involve scheduling, task assignment, "minimum time"?
+→ YES → Type 4 (Scheduling + Greedy)
+
+Does it involve a sliding window or removing specific elements?
+→ YES → Type 5 (Lazy Deletion)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Using a max-heap when you need a min-heap and vice versa
+To keep the k LARGEST, use a MIN-heap (so you can kick out the smallest quickly).
+To keep the k SMALLEST, use a MAX-heap.
+It's counterintuitive but that is how it works.
+
+MISTAKE 2 — Forgetting to check empty() before calling top()
+Calling top() or pop() on an empty heap is undefined behavior.
+Always check empty() first.
+
+MISTAKE 3 — Using a heap for sliding window maximum
+A monotonic deque is O(n). A heap is O(n log n) with lazy deletion.
+If the window is fixed size and you only need the max, use a deque.
+
+MISTAKE 4 — Not rebalancing in the Two Heaps pattern
+After every insert, you must ensure the sizes differ by at most 1.
+Skipping the rebalance causes wrong medians.
+
+MISTAKE 5 — Comparing floats in heap for median
+Store as int. Only divide when returning the median.
+Avoid floating point inside the heap comparison.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type 1 — Top K Elements
+Kth Largest Element in an Array
+https://leetcode.com/problems/kth-largest-element-in-an-array
+
+K Closest Points to Origin
+https://leetcode.com/problems/k-closest-points-to-origin
+
+Top K Frequent Elements
+https://leetcode.com/problems/top-k-frequent-elements
+
+Sort Characters By Frequency
+https://leetcode.com/problems/sort-characters-by-frequency
+
+Type 2 — Merge K Sorted
+Merge K Sorted Lists
+https://leetcode.com/problems/merge-k-sorted-lists
+
+Kth Smallest Element in a Sorted Matrix
+https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix
+
+Smallest Range Covering Elements from K Lists
+https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists
+
+Type 3 — Two Heaps
+Find Median from Data Stream
+https://leetcode.com/problems/find-median-from-data-stream
+
+Sliding Window Median
+https://leetcode.com/problems/sliding-window-median
+
+Type 4 — Scheduling
+Task Scheduler
+https://leetcode.com/problems/task-scheduler
+
+Process Tasks Using Servers
+https://leetcode.com/problems/process-tasks-using-servers
+
+Reorganize String
+https://leetcode.com/problems/reorganize-string
+
+Type 5 — Lazy Deletion
+Sliding Window Maximum
+https://leetcode.com/problems/sliding-window-maximum
+
+Maximum Average Pass Ratio
+https://leetcode.com/problems/maximum-average-pass-ratio
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE HEAP CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+k largest elements → min-heap of size k
+k smallest elements → max-heap of size k
+k-th largest → min-heap of size k, return top()
+Merge k sorted sequences → min-heap seeded with first element of each
+Median of a stream → max-heap (left) + min-heap (right), balanced
+"Always pick most urgent" → max-heap on priority
+Remove arbitrary element → lazy deletion with a hashmap
