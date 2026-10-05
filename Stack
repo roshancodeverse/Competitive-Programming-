@@ -1,0 +1,492 @@
+Stack problems look very different on the surface.
+
+But they all share one property:
+you need the most recently seen item that hasn't been used yet.
+
+That LIFO behavior is exactly what a stack gives you.
+
+Here is the complete guide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE CORE IDEA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A stack is the right tool when:
+→ You need to PAIR or MATCH something seen earlier with something now.
+→ You need to WAIT for a future element before processing a past one.
+→ You need to UNDO or REVERSE recent decisions.
+
+Ask yourself: "Do I need to look back at the most recent unmatched item?"
+→ YES → use a stack.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THERE ARE 4 TYPES OF STACK PROBLEMS ON LEETCODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPE 1 — BRACKET MATCHING → validate or fix parentheses
+TYPE 2 — MONOTONIC STACK → next greater/smaller, histograms
+TYPE 3 — EXPRESSION EVAL → calculators, reverse polish notation
+TYPE 4 — STACK SIMULATION → process elements that affect each other
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 1 — BRACKET MATCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Check if brackets are valid
+→ Find unmatched brackets
+→ Minimum additions/removals to make valid
+
+The idea: push opening brackets onto the stack.
+When you see a closing bracket, pop and check if it matches.
+At the end, anything left on the stack is unmatched.
+
+TEMPLATE:
+
+bool isValid(string s) {
+    stack<char> st;
+    for (char c : s) {
+        if (c == '(' || c == '[' || c == '{') {
+            st.push(c);
+        } else {
+            if (st.empty()) return false;
+            if (c == ')' && st.top() != '(') return false;
+            if (c == ']' && st.top() != '[') return false;
+            if (c == '}' && st.top() != '{') return false;
+            st.pop();
+        }
+    }
+    return st.empty();
+}
+EXAMPLE — Valid Parentheses
+https://leetcode.com/problems/valid-parentheses
+
+Directly apply the template above.
+
+EXAMPLE — Minimum Remove to Make Valid Parentheses
+https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses
+
+Push the INDEX (not the char) of unmatched '(' onto the stack.
+When you see ')': if stack is non-empty → pop (matched pair).
+                  if stack is empty    → mark ')' for removal.
+After the loop: all indices left in the stack are unmatched '(' → remove them.
+string minRemoveToMakeValid(string s) {
+    stack<int> st;
+    set<int> remove;
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == '(') {
+            st.push(i);
+        } else if (s[i] == ')') {
+            if (!st.empty()) st.pop();
+            else remove.insert(i);   // unmatched ')'
+        }
+    }
+    while (!st.empty()) { remove.insert(st.top()); st.pop(); }  // unmatched '('
+    string res;
+    for (int i = 0; i < s.size(); i++)
+        if (!remove.count(i)) res += s[i];
+    return res;
+}
+EXAMPLE — Longest Valid Parentheses
+https://leetcode.com/problems/longest-valid-parentheses
+
+Push indices. When a ')' matches a '(', pop it.
+The longest valid substring = gap between remaining unmatched indices.
+Push -1 as a sentinel at the start so the first valid char has a boundary.
+int longestValidParentheses(string s) {
+    stack<int> st;
+    st.push(-1);   // sentinel
+    int ans = 0;
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == '(') {
+            st.push(i);
+        } else {
+            st.pop();
+            if (st.empty()) st.push(i);   // new boundary
+            else ans = max(ans, i - st.top());
+        }
+    }
+    return ans;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 2 — MONOTONIC STACK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ "For each element, find the next/previous greater/smaller element"
+→ "Largest rectangle", "trapping rain water"
+→ Any problem where you need the nearest element satisfying a condition
+
+The idea: maintain a stack that is always sorted (monotonically).
+When a new element violates the order → pop until order is restored.
+Each popped element found its "answer" — the current element triggered it.
+
+DECREASING STACK → finds NEXT GREATER element
+(keep stack decreasing; pop when current > top)
+
+INCREASING STACK → finds NEXT SMALLER element
+(keep stack increasing; pop when current < top)
+
+TEMPLATE — Next Greater Element:
+
+vector<int> result(n, -1);
+stack<int> st;   // stores indices
+
+for (int i = 0; i < n; i++) {
+    while (!st.empty() && nums[st.top()] < nums[i]) {
+        result[st.top()] = nums[i];   // nums[i] is the next greater
+        st.pop();
+    }
+    st.push(i);
+}
+EXAMPLE — Daily Temperatures
+https://leetcode.com/problems/daily-temperatures
+
+For each day, find the number of days until a warmer temperature.
+Decreasing stack of indices. When temps[i] > temps[top] → pop.
+Answer for the popped index = i - popped_index.
+
+vector<int> dailyTemperatures(vector<int>& temps) {
+    vector<int> ans(temps.size(), 0);
+    stack<int> st;
+    for (int i = 0; i < temps.size(); i++) {
+        while (!st.empty() && temps[i] > temps[st.top()]) {
+            ans[st.top()] = i - st.top();
+            st.pop();
+        }
+        st.push(i);
+    }
+    return ans;
+}
+EXAMPLE — Next Greater Element II (circular array)
+https://leetcode.com/problems/next-greater-element-ii
+
+Simulate circular traversal by running the loop twice (i % n).
+Only push indices in the first pass (i < n).
+
+for (int i = 0; i < 2*n; i++) {
+    while (!st.empty() && nums[st.top()] < nums[i % n]) {
+        res[st.top()] = nums[i % n];
+        st.pop();
+    }
+    if (i < n) st.push(i);
+}
+EXAMPLE — Largest Rectangle in Histogram
+https://leetcode.com/problems/largest-rectangle-in-histogram
+
+For each bar, find the leftmost and rightmost extent where it is the shortest.
+Increasing stack. When heights[i] < heights[top] → the top bar can't extend right.
+Width = i - stack_below_top - 1.
+
+int largestRectangleArea(vector<int>& heights) {
+    heights.push_back(0);   // sentinel to flush the stack at the end
+    stack<int> st;
+    int ans = 0;
+    for (int i = 0; i < heights.size(); i++) {
+        while (!st.empty() && heights[i] < heights[st.top()]) {
+            int h = heights[st.top()]; st.pop();
+            int w = st.empty() ? i : i - st.top() - 1;
+            ans = max(ans, h * w);
+        }
+        st.push(i);
+    }
+    return ans;
+}
+EXAMPLE — Trapping Rain Water
+https://leetcode.com/problems/trapping-rain-water
+
+Stack-based approach: find valleys between taller bars.
+When current bar is taller than top → water can be trapped.
+Water = (min(current, left_wall) - bottom) * width.
+
+int trap(vector<int>& height) {
+    stack<int> st;
+    int ans = 0;
+    for (int i = 0; i < height.size(); i++) {
+        while (!st.empty() && height[i] > height[st.top()]) {
+            int bottom = height[st.top()]; st.pop();
+            if (st.empty()) break;
+            int left = st.top();
+            int h = min(height[left], height[i]) - bottom;
+            int w = i - left - 1;
+            ans += h * w;
+        }
+        st.push(i);
+    }
+    return ans;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 3 — EXPRESSION EVALUATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Evaluate mathematical expressions with +, -, *, /
+→ Handle operator precedence and parentheses
+→ Decode or expand nested structures
+
+The idea: use a stack to defer computation.
+On '(' → push current result and sign, start fresh.
+On ')' → combine current result with what was pushed.
+
+EXAMPLE — Evaluate Reverse Polish Notation
+https://leetcode.com/problems/evaluate-reverse-polish-notation
+
+RPN (postfix) has no parentheses. Operators come after their operands.
+Push numbers. When you see an operator → pop two numbers, apply, push result.
+
+int evalRPN(vector<string>& tokens) {
+    stack<long long> st;
+    for (string& t : tokens) {
+        if (t == "+" || t == "-" || t == "*" || t == "/") {
+            long long b = st.top(); st.pop();
+            long long a = st.top(); st.pop();
+            if (t == "+") st.push(a + b);
+            if (t == "-") st.push(a - b);
+            if (t == "*") st.push(a * b);
+            if (t == "/") st.push(a / b);
+        } else {
+            st.push(stoll(t));
+        }
+    }
+    return st.top();
+}
+EXAMPLE — Basic Calculator II (no parentheses, has * and /)
+https://leetcode.com/problems/basic-calculator-ii
+
+Process left to right. For + and - → push the number (with sign).
+For * and / → pop the last number, compute, push result.
+Final answer = sum of everything on the stack.
+
+int calculate(string s) {
+    stack<int> st;
+    int num = 0;
+    char op = '+';
+    for (int i = 0; i <= s.size(); i++) {
+        char c = s[i];
+        if (isdigit(c)) { num = num * 10 + (c - '0'); }
+        if ((!isdigit(c) && c != ' ') || i == s.size()) {
+            if (op == '+') st.push(num);
+            if (op == '-') st.push(-num);
+            if (op == '*') { int t = st.top(); st.pop(); st.push(t * num); }
+            if (op == '/') { int t = st.top(); st.pop(); st.push(t / num); }
+            op = c;
+            num = 0;
+        }
+    }
+    int ans = 0;
+    while (!st.empty()) { ans += st.top(); st.pop(); }
+    return ans;
+}
+EXAMPLE — Decode String
+https://leetcode.com/problems/decode-string
+
+"3[a2[bc]]" → "abcbcabcbcabcbc"
+When you see '[': push current string and repeat count onto stack, reset both.
+When you see ']': pop count and prefix, append current string repeated.
+
+string decodeString(string s) {
+    stack<int>    counts;
+    stack<string> strs;
+    string cur;
+    int k = 0;
+    for (char c : s) {
+        if (isdigit(c)) {
+            k = k * 10 + (c - '0');
+        } else if (c == '[') {
+            counts.push(k); k = 0;
+            strs.push(cur); cur = "";
+        } else if (c == ']') {
+            int times = counts.top(); counts.pop();
+            string prev = strs.top(); strs.pop();
+            for (int i = 0; i < times; i++) prev += cur;
+            cur = prev;
+        } else {
+            cur += c;
+        }
+    }
+    return cur;
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TYPE 4 — STACK SIMULATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When to use:
+→ Elements interact with previously seen elements
+→ New elements can destroy, cancel, or modify the top of the stack
+→ "Simulate" a process that requires looking at what came before
+
+EXAMPLE — Asteroid Collision
+https://leetcode.com/problems/asteroid-collision
+
+Positive asteroids move right, negative move left.
+Collision happens when a positive is followed by a negative (stack top > 0, cur < 0).
+Simulate: push onto stack. If collision → compare sizes.
+
+vector<int> asteroidCollision(vector<int>& asteroids) {
+    stack<int> st;
+    for (int a : asteroids) {
+        bool survived = true;
+        while (survived && a < 0 && !st.empty() && st.top() > 0) {
+            if (st.top() < -a) st.pop();        // stack asteroid destroyed
+            else if (st.top() == -a) { st.pop(); survived = false; }  // both destroyed
+            else survived = false;                 // new one destroyed
+        }
+        if (survived) st.push(a);
+    }
+    vector<int> res;
+    while (!st.empty()) { res.push_back(st.top()); st.pop(); }
+    reverse(res.begin(), res.end());
+    return res;
+}
+EXAMPLE — Remove All Adjacent Duplicates in String
+https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string
+
+Push characters. If current == top → they cancel → pop.
+Stack contains the result at the end.
+
+string removeDuplicates(string s) {
+    stack<char> st;
+    for (char c : s) {
+        if (!st.empty() && st.top() == c) st.pop();
+        else st.push(c);
+    }
+    string res;
+    while (!st.empty()) { res += st.top(); st.pop(); }
+    reverse(res.begin(), res.end());
+    return res;
+}
+EXAMPLE — Min Stack
+https://leetcode.com/problems/min-stack
+
+Support push/pop/top/getMin in O(1).
+Use a second stack that tracks the minimum at each level.
+When you push: push min(val, min_stack.top()) onto the min stack.
+
+class MinStack {
+    stack<int> st, minSt;
+public:
+    void push(int val) {
+        st.push(val);
+        minSt.push(minSt.empty() ? val : min(val, minSt.top()));
+    }
+    void pop() { st.pop(); minSt.pop(); }
+    int top()  { return st.top(); }
+    int getMin() { return minSt.top(); }
+};
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW TO IDENTIFY WHICH TYPE — DECISION GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Read the problem. Ask these questions in order:
+
+Does it involve brackets, parentheses, or nested structures?
+→ YES → Type 1 (Bracket Matching)
+Count unmatched → track indices on stack.
+Nested decoding → push state on '[', restore on ']'.
+
+Does it ask for next/previous greater or smaller element?
+Or involve histograms, trapped water, or span of a value?
+→ YES → Type 2 (Monotonic Stack)
+Next GREATER → decreasing stack (pop when current > top).
+Next SMALLER → increasing stack (pop when current < top).
+
+Does it involve evaluating a mathematical expression?
+→ YES → Type 3 (Expression Evaluation)
+Postfix (RPN) → push numbers, apply on operator.
+Infix (+,-,*,/) → defer + and -, compute * and / immediately.
+
+Do elements cancel, destroy, or modify each other?
+→ YES → Type 4 (Stack Simulation)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON MISTAKES AND HOW TO AVOID THEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MISTAKE 1 — Not checking if the stack is empty before top()
+Calling st.top() on an empty stack is undefined behavior.
+Always check !st.empty() before accessing top.
+
+MISTAKE 2 — Choosing the wrong monotonic direction
+Decreasing stack → finds next GREATER (you pop when current is bigger).
+Increasing stack → finds next SMALLER (you pop when current is smaller).
+Mixing these up gives the opposite answer silently.
+
+MISTAKE 3 — Not using indices in the monotonic stack
+When you need the distance or width (Daily Temperatures, Histogram),
+push indices, not values. Retrieve the value as nums[st.top()].
+
+MISTAKE 4 — Forgetting the sentinel in histogram problems
+Without appending 0 to heights, bars at the right end never get popped.
+Always push a sentinel (0 for max problems, INT_MAX for min problems)
+to flush the remaining stack at the end.
+
+MISTAKE 5 — Wrong order of pops in RPN
+The second pop is the LEFT operand, first pop is the RIGHT operand.
+b = st.top(); st.pop(); → right operand
+a = st.top(); st.pop(); → left operand
+Result: a op b (not b op a). Order matters for - and /.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRACTICE PROBLEMS — IN ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type 1 — Bracket Matching
+Valid Parentheses
+https://leetcode.com/problems/valid-parentheses
+
+Minimum Remove to Make Valid Parentheses
+https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses
+
+Longest Valid Parentheses (Hard)
+https://leetcode.com/problems/longest-valid-parentheses
+
+Type 2 — Monotonic Stack
+Daily Temperatures
+https://leetcode.com/problems/daily-temperatures
+
+Next Greater Element I
+https://leetcode.com/problems/next-greater-element-i
+
+Next Greater Element II
+https://leetcode.com/problems/next-greater-element-ii
+
+Largest Rectangle in Histogram (Hard)
+https://leetcode.com/problems/largest-rectangle-in-histogram
+
+Trapping Rain Water (Hard)
+https://leetcode.com/problems/trapping-rain-water
+
+Type 3 — Expression Evaluation
+Evaluate Reverse Polish Notation
+https://leetcode.com/problems/evaluate-reverse-polish-notation
+
+Basic Calculator II
+https://leetcode.com/problems/basic-calculator-ii
+
+Decode String
+https://leetcode.com/problems/decode-string
+
+Type 4 — Stack Simulation
+Min Stack
+https://leetcode.com/problems/min-stack
+
+Asteroid Collision
+https://leetcode.com/problems/asteroid-collision
+
+Remove All Adjacent Duplicates in String
+https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE STACK CHEAT SHEET — ONE LINE EACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bracket matching → push open, pop and check on close
+Unmatched brackets → push indices, remaining stack = unmatched
+Next greater element → decreasing stack, pop when current > top
+Next smaller element → increasing stack, pop when current < top
+Histogram / rain water → increasing stack of indices, pop on smaller bar
+RPN evaluation → push numbers, apply operator on two pops
+Infix with * / → defer + -, compute * / immediately
+Nested decode/expand → push state on open bracket, restore on close
+Elements cancel each other → push/pop cancel pairs, stack = survivors
+O(1) min with stack → second stack tracking min at each level
